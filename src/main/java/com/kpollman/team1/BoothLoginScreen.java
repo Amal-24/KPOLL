@@ -56,7 +56,7 @@ public class BoothLoginScreen extends JPanel {
         gbc.gridy = 2;
         loginCard.add(boothIdLabel, gbc);
 
-        boothIdField = new ModernUI.ModernTextField("Enter Booth ID (e.g., 23)");
+        boothIdField = new ModernUI.ModernTextField("");
         gbc.gridy = 3;
         gbc.insets = new Insets(0, 0, 15, 0);
         loginCard.add(boothIdField, gbc);
@@ -105,10 +105,10 @@ public class BoothLoginScreen extends JPanel {
     }
 
     private void authenticate() {
-        String boothIdStr = boothIdField.getText();
+        String boothIdStr = boothIdField.getText().trim();
         String password = new String(passwordField.getPassword());
 
-        if (boothIdStr.isEmpty() || password.isEmpty() || boothIdStr.startsWith("Enter")) {
+        if (boothIdStr.isEmpty() || password.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter both Booth ID and Password", "Login Error", JOptionPane.ERROR_MESSAGE);
             return;
         }

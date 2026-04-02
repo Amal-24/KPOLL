@@ -72,12 +72,13 @@ public class VoterDetailsDisplayScreen extends JPanel {
         actionPanel.setOpaque(false);
         actionPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
 
-        ModernUI.ModernButton verifyButton = new ModernUI.ModernButton("Confirm Identity & Mark as Voted");
-        verifyButton.setBackground(ModernUI.PRIMARY_COLOR);
-        verifyButton.setEnabled(!voter.isVotedStatus());
-        verifyButton.addActionListener(e -> markAsVoted());
+        if (!voter.isVotedStatus()) {
+            ModernUI.ModernButton verifyButton = new ModernUI.ModernButton("Confirm Identity & Mark as Voted");
+            verifyButton.setBackground(ModernUI.PRIMARY_COLOR);
+            verifyButton.addActionListener(e -> markAsVoted());
+            actionPanel.add(verifyButton);
+        }
 
-        actionPanel.add(verifyButton);
         add(actionPanel, BorderLayout.SOUTH);
     }
 

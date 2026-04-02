@@ -49,7 +49,7 @@ public class VoterAuthenticationScreen extends JPanel {
         gbc.gridy = 0;
         card.add(label, gbc);
 
-        epicField = new ModernUI.ModernTextField("e.g., KPL1234567");
+        epicField = new ModernUI.ModernTextField("");
         gbc.gridy = 1;
         card.add(epicField, gbc);
 
@@ -69,7 +69,7 @@ public class VoterAuthenticationScreen extends JPanel {
 
     private void searchVoter() {
         String epicNo = epicField.getText().trim();
-        if (epicNo.isEmpty() || epicNo.startsWith("e.g.")) {
+        if (epicNo.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter a valid EPIC number");
             return;
         }

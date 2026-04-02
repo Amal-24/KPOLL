@@ -51,7 +51,7 @@ public class PriorityAssignmentScreen extends JPanel {
 
         gbc.gridy = 2; gbc.insets = new Insets(10, 0, 5, 0);
         card.add(new JLabel("Assigned Official"), gbc);
-        officialField = new ModernUI.ModernTextField("Enter Name");
+        officialField = new ModernUI.ModernTextField("");
         gbc.gridy = 3; gbc.insets = new Insets(0, 0, 25, 0);
         card.add(officialField, gbc);
 
@@ -72,7 +72,7 @@ public class PriorityAssignmentScreen extends JPanel {
         String urgency = (String) urgencyDropdown.getSelectedItem();
         String official = officialField.getText().trim();
 
-        if (official.isEmpty() || official.startsWith("Enter")) {
+        if (official.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please assign an official");
             return;
         }

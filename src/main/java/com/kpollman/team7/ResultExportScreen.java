@@ -1,5 +1,6 @@
 package com.kpollman.team7;
 
+import com.kpollman.ui.ModernUI;
 import javax.swing.*;
 import java.awt.*;
 
@@ -8,7 +9,7 @@ import java.awt.*;
  */
 public class ResultExportScreen extends JFrame {
     private JComboBox<String> formatDropdown;
-    private JButton exportButton;
+    private ModernUI.ModernButton exportButton;
 
     public ResultExportScreen() {
         setTitle("K-PollMan 2026 - Export Results Portal");
@@ -31,7 +32,7 @@ public class ResultExportScreen extends JFrame {
         formatDropdown = new JComboBox<>(new String[]{"PDF", "Excel (XLSX)", "JSON", "CSV"});
         gbc.gridx = 1; add(formatDropdown, gbc);
 
-        exportButton = new JButton("Generate Export File");
+        exportButton = new ModernUI.ModernButton("Generate Export File");
         gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
         add(exportButton, gbc);
 

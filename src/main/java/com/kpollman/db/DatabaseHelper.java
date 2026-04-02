@@ -1,7 +1,7 @@
 package com.kpollman.db;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -14,8 +14,11 @@ public class DatabaseHelper {
 
     static {
         Properties properties = new Properties();
-        try (FileInputStream fis = new FileInputStream("db.properties")) {
-            properties.load(fis);
+        try (InputStream is = DatabaseHelper.class.getClassLoader().getResourceAsStream("db.properties")) {
+            if (is == null) {
+                throw new IOException("db.properties not found in classpath");
+            }
+            properties.load(is);
             URL = properties.getProperty("db.url");
             USER = properties.getProperty("db.user");
             PASSWORD = properties.getProperty("db.password");
@@ -24,7 +27,9 @@ public class DatabaseHelper {
                 throw new IOException("Incomplete configuration in db.properties");
             }
         } catch (IOException e) {
-            System.err.println("DATABASE CONFIG ERROR: Could not load db.properties from root folder.");
+            System.err.println("DATABASE CONFIG ERROR: Could not load db.properties from classpath.");
+            System.err.println("Expected location: src/main/resources/db.properties");
+            e.printStackTrace();
         }
     }
 

@@ -71,7 +71,7 @@ public class LoginScreen extends JPanel {
         gbc.insets = new Insets(10, 0, 5, 0);
         loginCard.add(usernameLabel, gbc);
 
-        usernameField = new ModernUI.ModernTextField("Enter Booth ID");
+        usernameField = new ModernUI.ModernTextField("");
         gbc.gridy = 5;
         gbc.insets = new Insets(0, 0, 15, 0);
         loginCard.add(usernameField, gbc);

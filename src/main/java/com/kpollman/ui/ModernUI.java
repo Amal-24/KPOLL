@@ -29,8 +29,8 @@ public class ModernUI {
         UIManager.put("OptionPane.messageForeground", TEXT_COLOR_DARK);
         UIManager.put("OptionPane.messageFont", MAIN_FONT);
         UIManager.put("Button.font", MAIN_FONT);
-        UIManager.put("Button.background", ACCENT_COLOR);
-        UIManager.put("Button.foreground", Color.WHITE);
+        UIManager.put("Button.background", Color.WHITE);
+        UIManager.put("Button.foreground", TEXT_COLOR_DARK);
         UIManager.put("OptionPane.border", BorderFactory.createLineBorder(BORDER_COLOR, 1));
     }
 

@@ -1,6 +1,7 @@
 package com.kpollman.team5;
 
 import com.kpollman.db.DatabaseHelper;
+import com.kpollman.ui.ModernUI;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -39,8 +40,8 @@ public class ResultVerificationScreen extends JFrame {
 
         // Action Panel
         JPanel actionPanel = new JPanel();
-        JButton refreshButton = new JButton("Refresh Results");
-        JButton verifyButton = new JButton("Verify Selected Result");
+        ModernUI.ModernButton refreshButton = new ModernUI.ModernButton("Refresh Results");
+        ModernUI.ModernButton verifyButton = new ModernUI.ModernButton("Verify Selected Result");
 
         actionPanel.add(refreshButton);
         actionPanel.add(verifyButton);

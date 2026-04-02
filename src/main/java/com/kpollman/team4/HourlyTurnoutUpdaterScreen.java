@@ -1,6 +1,7 @@
 package com.kpollman.team4;
 
 import com.kpollman.db.DatabaseHelper;
+import com.kpollman.ui.ModernUI;
 import javax.swing.*;
 import java.awt.*;
 import java.sql.Connection;
@@ -14,7 +15,7 @@ public class HourlyTurnoutUpdaterScreen extends JFrame {
     private int boothId;
     private JComboBox<Integer> hourDropdown;
     private JTextField maleField, femaleField, thirdGenderField;
-    private JButton updateButton;
+    private ModernUI.ModernButton updateButton;
 
     public HourlyTurnoutUpdaterScreen(int boothId) {
         this.boothId = boothId;
@@ -51,7 +52,7 @@ public class HourlyTurnoutUpdaterScreen extends JFrame {
         thirdGenderField = new JTextField(10);
         gbc.gridx = 1; add(thirdGenderField, gbc);
 
-        updateButton = new JButton("Save Turnout Data");
+        updateButton = new ModernUI.ModernButton("Save Turnout Data");
         gbc.gridx = 0; gbc.gridy = 5; gbc.gridwidth = 2;
         add(updateButton, gbc);
 

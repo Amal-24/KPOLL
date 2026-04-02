@@ -1,6 +1,7 @@
 package com.kpollman.team2;
 
 import com.kpollman.db.DatabaseHelper;
+import com.kpollman.ui.ModernUI;
 import javax.swing.*;
 import java.awt.*;
 import java.sql.Connection;
@@ -42,7 +43,7 @@ public class BoothCapacityMonitorScreen extends JFrame {
         capacityBar.setStringPainted(true);
         contentPanel.add(capacityBar);
 
-        JButton refreshButton = new JButton("Refresh Capacity");
+        ModernUI.ModernButton refreshButton = new ModernUI.ModernButton("Refresh Capacity");
         contentPanel.add(refreshButton);
         add(contentPanel, BorderLayout.CENTER);
 

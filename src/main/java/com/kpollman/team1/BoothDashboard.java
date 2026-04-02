@@ -25,6 +25,11 @@ public class BoothDashboard extends JPanel {
         this.boothName = boothName;
         this.constituencyId = constituencyId;
 
+        // If data is missing (e.g. coming back from other screens), fetch from DB
+        if (this.boothName == null || this.boothName.equals("Current Booth") || this.constituencyId == 0) {
+            fetchBoothDetails();
+        }
+
         setLayout(new BorderLayout());
         setBackground(ModernUI.BACKGROUND_COLOR);
         setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
@@ -171,6 +176,21 @@ public class BoothDashboard extends JPanel {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private void fetchBoothDetails() {
+        try (Connection conn = DatabaseHelper.getConnection()) {
+            String query = "SELECT booth_name, constituency_id FROM Booths WHERE booth_id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setInt(1, boothId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                this.boothName = rs.getString("booth_name");
+                this.constituencyId = rs.getInt("constituency_id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void refreshStats() {
