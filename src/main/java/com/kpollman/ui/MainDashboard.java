@@ -54,6 +54,11 @@ public class MainDashboard extends JFrame {
     }
 
     private void setupDashboard(int boothId, String boothName, int constituencyId) {
+        // Initialize default session for modules
+        com.kpollman.team3.Session.login(boothId, "OFFICIAL");
+        com.kpollman.team3.Session.boothId = boothId;
+        com.kpollman.team3.Session.constituencyId = constituencyId;
+
         JPanel dashboardWrapper = new JPanel(new BorderLayout());
         
         // Sidebar
