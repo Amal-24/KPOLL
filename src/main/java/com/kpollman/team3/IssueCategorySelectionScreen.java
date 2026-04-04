@@ -20,10 +20,10 @@ public class IssueCategorySelectionScreen extends JPanel {
         JPanel categoriesPanel = new JPanel(new GridLayout(2, 2, 30, 30));
         categoriesPanel.setOpaque(false);
 
-        categoriesPanel.add(createCategoryCard("EVM", new Color(239, 68, 68))); // Red 500
-        categoriesPanel.add(createCategoryCard("Voter List", new Color(59, 130, 246))); // Blue 500
-        categoriesPanel.add(createCategoryCard("Accessibility", new Color(34, 197, 94))); // Green 500
-        categoriesPanel.add(createCategoryCard("Law & Order", new Color(249, 115, 22))); // Orange 500
+        categoriesPanel.add(createCategoryCard("EVM", new Color(239, 68, 68)));
+        categoriesPanel.add(createCategoryCard("Voter List", new Color(59, 130, 246)));
+        categoriesPanel.add(createCategoryCard("Accessibility", new Color(34, 197, 94)));
+        categoriesPanel.add(createCategoryCard("Law & Order", new Color(249, 115, 22)));
 
         add(categoriesPanel, BorderLayout.CENTER);
         

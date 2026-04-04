@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 
 public class BoothLoginScreen extends JPanel {
     private ModernUI.ModernTextField boothIdField;
-    private JPasswordField passwordField;
     private ModernUI.ModernButton loginButton;
     private LoginListener loginListener;
 
@@ -58,30 +57,13 @@ public class BoothLoginScreen extends JPanel {
 
         boothIdField = new ModernUI.ModernTextField("");
         gbc.gridy = 3;
-        gbc.insets = new Insets(0, 0, 15, 0);
-        loginCard.add(boothIdField, gbc);
-
-        // Password
-        JLabel passwordLabel = new JLabel("Password");
-        passwordLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        gbc.gridy = 4;
-        gbc.insets = new Insets(10, 0, 5, 0);
-        loginCard.add(passwordLabel, gbc);
-
-        passwordField = new JPasswordField();
-        passwordField.setFont(ModernUI.MAIN_FONT);
-        passwordField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(ModernUI.BORDER_COLOR, 1, true),
-                BorderFactory.createEmptyBorder(10, 15, 10, 15)
-        ));
-        gbc.gridy = 5;
         gbc.insets = new Insets(0, 0, 25, 0);
-        loginCard.add(passwordField, gbc);
+        loginCard.add(boothIdField, gbc);
 
         // Login Button
         loginButton = new ModernUI.ModernButton("Login");
         loginButton.setBackground(ModernUI.PRIMARY_COLOR);
-        gbc.gridy = 6;
+        gbc.gridy = 4;
         gbc.insets = new Insets(10, 0, 20, 0);
         loginCard.add(loginButton, gbc);
 
@@ -89,13 +71,13 @@ public class BoothLoginScreen extends JPanel {
         JLabel forgotPassword = new JLabel("Forgot Password?", JLabel.RIGHT);
         forgotPassword.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         forgotPassword.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        gbc.gridy = 7;
+        gbc.gridy = 5;
         loginCard.add(forgotPassword, gbc);
 
         JLabel contactAdmin = new JLabel("System Administrator Contact", JLabel.CENTER);
         contactAdmin.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         contactAdmin.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        gbc.gridy = 8;
+        gbc.gridy = 6;
         gbc.insets = new Insets(20, 0, 0, 0);
         loginCard.add(contactAdmin, gbc);
 
@@ -106,18 +88,16 @@ public class BoothLoginScreen extends JPanel {
 
     private void authenticate() {
         String boothIdStr = boothIdField.getText().trim();
-        String password = new String(passwordField.getPassword());
 
-        if (boothIdStr.isEmpty() || password.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter both Booth ID and Password", "Login Error", JOptionPane.ERROR_MESSAGE);
+        if (boothIdStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter Booth ID", "Login Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         try (Connection conn = DatabaseHelper.getConnection()) {
-            String query = "SELECT * FROM Booths WHERE booth_id = ? AND booth_password = ?";
+            String query = "SELECT * FROM Booths WHERE booth_id = ?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setInt(1, Integer.parseInt(boothIdStr));
-            pstmt.setString(2, password);
 
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
@@ -128,7 +108,7 @@ public class BoothLoginScreen extends JPanel {
                     loginListener.onLoginSuccess(Integer.parseInt(boothIdStr), boothName, constituencyId);
                 }
             } else {
-                JOptionPane.showMessageDialog(this, "Invalid Booth ID or Password", "Login Failed", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Invalid Booth ID", "Login Failed", JOptionPane.ERROR_MESSAGE);
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Database Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
