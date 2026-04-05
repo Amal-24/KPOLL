@@ -20,8 +20,10 @@ public class MainDashboard extends JFrame {
     private JPanel contentArea;
     private CardLayout cardLayout;
     private JPanel activeNavItem;
-    private JPanel mainContainer;
-    private CardLayout mainLayout;
+    private boolean isLoggedIn = false;
+    private int currentBoothId;
+    private String currentBoothName;
+    private int currentConstituencyId;
 
     public MainDashboard() {
         instance = this;
@@ -30,18 +32,7 @@ public class MainDashboard extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        mainLayout = new CardLayout();
-        mainContainer = new JPanel(mainLayout);
-
-        // Login Screen
-        BoothLoginScreen loginScreen = new BoothLoginScreen((boothId, boothName, constituencyId) -> {
-            setupDashboard(boothId, boothName, constituencyId);
-            mainLayout.show(mainContainer, "Dashboard");
-        });
-        mainContainer.add(loginScreen, "Login");
-
-        add(mainContainer);
-        mainLayout.show(mainContainer, "Login");
+        setupDashboard();
     }
 
     public static void showView(JPanel panel) {
@@ -53,13 +44,8 @@ public class MainDashboard extends JFrame {
         }
     }
 
-    private void setupDashboard(int boothId, String boothName, int constituencyId) {
-        // Initialize default session for modules
-        com.kpollman.team3.Session.login(boothId, "OFFICIAL");
-        com.kpollman.team3.Session.boothId = boothId;
-        com.kpollman.team3.Session.constituencyId = constituencyId;
-
-        JPanel dashboardWrapper = new JPanel(new BorderLayout());
+    private void setupDashboard() {
+        setLayout(new BorderLayout());
         
         // Sidebar
         sidebar = new JPanel();
@@ -81,28 +67,95 @@ public class MainDashboard extends JFrame {
         contentArea.setBackground(ModernUI.BACKGROUND_COLOR);
 
         // Navigation Items
-        addNavItem("Dashboard", e -> showModule("Dashboard", new BoothDashboard(boothId, boothName, constituencyId)));
-        addNavItem("Queue Mgmt", e -> showModule("Team2", new QueueStatusDashboard()));
-        addNavItem("Issue Reporting", e -> showModule("Team3", new LoginScreen(() -> {
-            showModule("Team3Dashboard", new IssueTrackingDashboard());
-        })));
-        addNavItem("Turnout Analytics", e -> showModule("Team4", new TurnoutDashboard()));
-        addNavItem("Counting Center", e -> showModule("Team5", new CountingCenterDashboard()));
-        addNavItem("Result Processing", e -> showModule("Team6", new ResultAggregationScreen()));
-        addNavItem("Live Results", e -> showModule("Team7", new LiveResultsDashboard()));
+        addNavItem("Home", e -> showModule("Home", new HomeView()));
+        
+        addNavItem("Dashboard", e -> {
+            if (isLoggedIn) {
+                showModule("Dashboard", new BoothDashboard(currentBoothId, currentBoothName, currentConstituencyId));
+            } else {
+                showModule("Login", new BoothLoginScreen((id, name, constId) -> {
+                    isLoggedIn = true;
+                    currentBoothId = id;
+                    currentBoothName = name;
+                    currentConstituencyId = constId;
+                    com.kpollman.team3.Session.login(id, "OFFICIAL");
+                    com.kpollman.team3.Session.boothId = id;
+                    com.kpollman.team3.Session.constituencyId = constId;
+                    showModule("Dashboard", new BoothDashboard(id, name, constId));
+                }));
+            }
+        });
+
+        addNavItem("Queue Mgmt", e -> {
+            if (checkLogin()) showModule("Team2", new QueueStatusDashboard());
+        });
+        
+        addNavItem("Issue Reporting", e -> {
+            if (checkLogin()) showModule("Team3", new LoginScreen(() -> {
+                showModule("Team3Dashboard", new IssueTrackingDashboard());
+            }));
+        });
+        
+        addNavItem("Turnout Analytics", e -> {
+            if (checkLogin()) showModule("Team4", new TurnoutDashboard());
+        });
+        
+        addNavItem("Counting Center", e -> {
+            if (checkLogin()) showModule("Team5", new CountingCenterDashboard());
+        });
+        
+        addNavItem("Result Processing", e -> {
+            if (checkLogin()) showModule("Team6", new ResultAggregationScreen());
+        });
+        
+        addNavItem("Live Results", e -> {
+            if (checkLogin()) showModule("Team7", new LiveResultsDashboard());
+        });
 
         sidebar.add(Box.createVerticalGlue());
         addNavItem("Logout", e -> {
-            mainLayout.show(mainContainer, "Login");
+            isLoggedIn = false;
+            showModule("Home", new HomeView());
         });
 
-        dashboardWrapper.add(sidebar, BorderLayout.WEST);
-        dashboardWrapper.add(contentArea, BorderLayout.CENTER);
+        add(sidebar, BorderLayout.WEST);
+        add(contentArea, BorderLayout.CENTER);
 
-        mainContainer.add(dashboardWrapper, "Dashboard");
-        
         // Initial view
-        showModule("Dashboard", new BoothDashboard(boothId, boothName, constituencyId));
+        showModule("Home", new HomeView());
+        setActiveNavItem("Home");
+    }
+
+    private boolean checkLogin() {
+        if (!isLoggedIn) {
+            JOptionPane.showMessageDialog(this, "Please login via Dashboard first", "Authentication Required", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        return true;
+    }
+
+    private void setActiveNavItem(String text) {
+        for (Component c : sidebar.getComponents()) {
+            if (c instanceof JPanel) {
+                JPanel navItem = (JPanel) c;
+                if (navItem.getComponentCount() > 0 && navItem.getComponent(0) instanceof JLabel) {
+                    JLabel label = (JLabel) navItem.getComponent(0);
+                    if (label.getText().equals(text)) {
+                        if (activeNavItem != null) {
+                            activeNavItem.setBackground(null);
+                            activeNavItem.setOpaque(false);
+                            ((JLabel)activeNavItem.getComponent(0)).setForeground(new Color(203, 213, 225));
+                        }
+                        activeNavItem = navItem;
+                        navItem.setBackground(ModernUI.ACCENT_COLOR);
+                        navItem.setOpaque(true);
+                        label.setForeground(Color.WHITE);
+                        navItem.repaint();
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     private void addNavItem(String text, ActionListener action) {

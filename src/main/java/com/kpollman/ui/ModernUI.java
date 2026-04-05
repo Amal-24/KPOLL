@@ -94,7 +94,7 @@ public class ModernUI {
             ));
         }
 
-        private static class RoundedBorder extends javax.swing.border.AbstractBorder {
+        public static class RoundedBorder extends javax.swing.border.AbstractBorder {
             private final int radius;
             private final Color color;
 
