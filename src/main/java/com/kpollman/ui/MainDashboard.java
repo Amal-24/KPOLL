@@ -20,7 +20,11 @@ public class MainDashboard extends JFrame {
     private JPanel contentArea;
     private CardLayout cardLayout;
     private JPanel activeNavItem;
-    private boolean isLoggedIn = false;
+    private JPanel mainContainer;
+    private CardLayout mainLayout;
+    
+    private boolean isIdAuthenticated = false;
+    private boolean isFullAuthenticated = false;
     private int currentBoothId;
     private String currentBoothName;
     private int currentConstituencyId;
@@ -32,7 +36,24 @@ public class MainDashboard extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        setupDashboard();
+        mainLayout = new CardLayout();
+        mainContainer = new JPanel(mainLayout);
+        add(mainContainer);
+
+        showInitialLogin();
+    }
+
+    private void showInitialLogin() {
+        BoothLoginScreen idLogin = new BoothLoginScreen((id, name, constId) -> {
+            isIdAuthenticated = true;
+            currentBoothId = id;
+            currentBoothName = name;
+            currentConstituencyId = constId;
+            setupApp();
+            mainLayout.show(mainContainer, "App");
+        });
+        mainContainer.add(idLogin, "InitialLogin");
+        mainLayout.show(mainContainer, "InitialLogin");
     }
 
     public static void showView(JPanel panel) {
@@ -44,8 +65,8 @@ public class MainDashboard extends JFrame {
         }
     }
 
-    private void setupDashboard() {
-        setLayout(new BorderLayout());
+    private void setupApp() {
+        JPanel appWrapper = new JPanel(new BorderLayout());
         
         // Sidebar
         sidebar = new JPanel();
@@ -70,14 +91,12 @@ public class MainDashboard extends JFrame {
         addNavItem("Home", e -> showModule("Home", new HomeView()));
         
         addNavItem("Dashboard", e -> {
-            if (isLoggedIn) {
+            if (isFullAuthenticated) {
                 showModule("Dashboard", new BoothDashboard(currentBoothId, currentBoothName, currentConstituencyId));
             } else {
-                showModule("Login", new BoothLoginScreen((id, name, constId) -> {
-                    isLoggedIn = true;
-                    currentBoothId = id;
-                    currentBoothName = name;
-                    currentConstituencyId = constId;
+                showModule("PasswordLogin", new BoothLoginScreen(currentBoothId, (id, name, constId) -> {
+                    isFullAuthenticated = true;
+                    // Initialize default session for modules after full login
                     com.kpollman.team3.Session.login(id, "OFFICIAL");
                     com.kpollman.team3.Session.boothId = id;
                     com.kpollman.team3.Session.constituencyId = constId;
@@ -87,48 +106,60 @@ public class MainDashboard extends JFrame {
         });
 
         addNavItem("Queue Mgmt", e -> {
-            if (checkLogin()) showModule("Team2", new QueueStatusDashboard());
+            if (checkFullLogin()) showModule("Team2", new QueueStatusDashboard());
         });
         
         addNavItem("Issue Reporting", e -> {
-            if (checkLogin()) showModule("Team3", new LoginScreen(() -> {
+            if (checkFullLogin()) showModule("Team3", new LoginScreen(() -> {
                 showModule("Team3Dashboard", new IssueTrackingDashboard());
             }));
         });
         
         addNavItem("Turnout Analytics", e -> {
-            if (checkLogin()) showModule("Team4", new TurnoutDashboard());
+            if (checkFullLogin()) showModule("Team4", new TurnoutDashboard());
         });
         
         addNavItem("Counting Center", e -> {
-            if (checkLogin()) showModule("Team5", new CountingCenterDashboard());
+            if (checkFullLogin()) showModule("Team5", new CountingCenterDashboard());
         });
         
         addNavItem("Result Processing", e -> {
-            if (checkLogin()) showModule("Team6", new ResultAggregationScreen());
+            if (checkFullLogin()) showModule("Team6", new ResultAggregationScreen());
         });
         
         addNavItem("Live Results", e -> {
-            if (checkLogin()) showModule("Team7", new LiveResultsDashboard());
+            if (checkFullLogin()) showModule("Team7", new LiveResultsDashboard());
         });
 
         sidebar.add(Box.createVerticalGlue());
         addNavItem("Logout", e -> {
-            isLoggedIn = false;
-            showModule("Home", new HomeView());
+            isIdAuthenticated = false;
+            isFullAuthenticated = false;
+            showInitialLogin();
         });
 
-        add(sidebar, BorderLayout.WEST);
-        add(contentArea, BorderLayout.CENTER);
+        appWrapper.add(sidebar, BorderLayout.WEST);
+        appWrapper.add(contentArea, BorderLayout.CENTER);
 
+        mainContainer.add(appWrapper, "App");
+        
         // Initial view
         showModule("Home", new HomeView());
         setActiveNavItem("Home");
     }
 
-    private boolean checkLogin() {
-        if (!isLoggedIn) {
-            JOptionPane.showMessageDialog(this, "Please login via Dashboard first", "Authentication Required", JOptionPane.WARNING_MESSAGE);
+    private boolean checkFullLogin() {
+        if (!isFullAuthenticated) {
+            JOptionPane.showMessageDialog(this, "Please verify password via Dashboard first", "Authentication Required", JOptionPane.WARNING_MESSAGE);
+            setActiveNavItem("Dashboard");
+            // Trigger dashboard login
+            showModule("PasswordLogin", new BoothLoginScreen(currentBoothId, (id, name, constId) -> {
+                isFullAuthenticated = true;
+                com.kpollman.team3.Session.login(id, "OFFICIAL");
+                com.kpollman.team3.Session.boothId = id;
+                com.kpollman.team3.Session.constituencyId = constId;
+                showModule("Dashboard", new BoothDashboard(id, name, constId));
+            }));
             return false;
         }
         return true;

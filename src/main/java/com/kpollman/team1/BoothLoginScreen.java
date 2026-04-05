@@ -13,19 +13,34 @@ public class BoothLoginScreen extends JPanel {
     private JPasswordField passwordField;
     private ModernUI.ModernButton loginButton;
     private LoginListener loginListener;
+    private boolean isPasswordMode;
+    private int prefilledBoothId;
 
     public interface LoginListener {
         void onLoginSuccess(int boothId, String boothName, int constituencyId);
     }
 
+    // Constructor for ID-only login
     public BoothLoginScreen(LoginListener loginListener) {
+        this(loginListener, false, -1);
+    }
+
+    // Constructor for Password-only login
+    public BoothLoginScreen(int boothId, LoginListener loginListener) {
+        this(loginListener, true, boothId);
+    }
+
+    private BoothLoginScreen(LoginListener loginListener, boolean isPasswordMode, int boothId) {
         this.loginListener = loginListener;
+        this.isPasswordMode = isPasswordMode;
+        this.prefilledBoothId = boothId;
+
         setBackground(ModernUI.BACKGROUND_COLOR);
         setLayout(new GridBagLayout());
 
         // Center Login Card
         ModernUI.RoundedPanel loginCard = new ModernUI.RoundedPanel(30, ModernUI.CARD_BACKGROUND);
-        loginCard.setPreferredSize(new Dimension(450, 600));
+        loginCard.setPreferredSize(new Dimension(450, isPasswordMode ? 500 : 500));
         loginCard.setLayout(new GridBagLayout());
         loginCard.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
 
@@ -35,7 +50,7 @@ public class BoothLoginScreen extends JPanel {
         gbc.insets = new Insets(10, 0, 10, 0);
 
         // Title
-        JLabel titleLabel = new JLabel("Booth Login", JLabel.CENTER);
+        JLabel titleLabel = new JLabel(isPasswordMode ? "Verify Password" : "Booth ID Entry", JLabel.CENTER);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 36));
         titleLabel.setForeground(ModernUI.TEXT_COLOR_DARK);
         gbc.gridy = 0;
@@ -50,36 +65,38 @@ public class BoothLoginScreen extends JPanel {
 
         gbc.insets = new Insets(20, 0, 5, 0);
         
-        // Booth ID
-        JLabel boothIdLabel = new JLabel("Booth ID");
-        boothIdLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        gbc.gridy = 2;
-        loginCard.add(boothIdLabel, gbc);
+        if (!isPasswordMode) {
+            // Booth ID
+            JLabel boothIdLabel = new JLabel("Booth ID");
+            boothIdLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            gbc.gridy = 2;
+            loginCard.add(boothIdLabel, gbc);
 
-        boothIdField = new ModernUI.ModernTextField("");
-        gbc.gridy = 3;
-        gbc.insets = new Insets(0, 0, 15, 0);
-        loginCard.add(boothIdField, gbc);
+            boothIdField = new ModernUI.ModernTextField("");
+            gbc.gridy = 3;
+            gbc.insets = new Insets(0, 0, 15, 0);
+            loginCard.add(boothIdField, gbc);
+        } else {
+            // Password
+            JLabel passwordLabel = new JLabel("Enter Password for Booth #" + boothId);
+            passwordLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            gbc.gridy = 4;
+            gbc.insets = new Insets(10, 0, 5, 0);
+            loginCard.add(passwordLabel, gbc);
 
-        // Password
-        JLabel passwordLabel = new JLabel("Password");
-        passwordLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        gbc.gridy = 4;
-        gbc.insets = new Insets(10, 0, 5, 0);
-        loginCard.add(passwordLabel, gbc);
-
-        passwordField = new JPasswordField();
-        passwordField.setFont(ModernUI.MAIN_FONT);
-        passwordField.setBorder(BorderFactory.createCompoundBorder(
-            new ModernUI.ModernTextField.RoundedBorder(10, ModernUI.BORDER_COLOR),
-            BorderFactory.createEmptyBorder(10, 15, 10, 15)
-        ));
-        gbc.gridy = 5;
-        gbc.insets = new Insets(0, 0, 25, 0);
-        loginCard.add(passwordField, gbc);
+            passwordField = new JPasswordField();
+            passwordField.setFont(ModernUI.MAIN_FONT);
+            passwordField.setBorder(BorderFactory.createCompoundBorder(
+                new ModernUI.ModernTextField.RoundedBorder(10, ModernUI.BORDER_COLOR),
+                BorderFactory.createEmptyBorder(10, 15, 10, 15)
+            ));
+            gbc.gridy = 5;
+            gbc.insets = new Insets(0, 0, 25, 0);
+            loginCard.add(passwordField, gbc);
+        }
 
         // Login Button
-        loginButton = new ModernUI.ModernButton("Login");
+        loginButton = new ModernUI.ModernButton(isPasswordMode ? "Verify" : "Next");
         loginButton.setBackground(ModernUI.PRIMARY_COLOR);
         gbc.gridy = 6;
         gbc.insets = new Insets(10, 0, 20, 0);
@@ -99,39 +116,49 @@ public class BoothLoginScreen extends JPanel {
     }
 
     private void authenticate() {
-        String boothIdStr = boothIdField.getText().trim();
-        String password = new String(passwordField.getPassword()).trim();
-
-        if (boothIdStr.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter Booth ID", "Login Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        if (password.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter Password", "Login Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        try (Connection conn = DatabaseHelper.getConnection()) {
-            String query = "SELECT * FROM Booths WHERE booth_id = ? AND booth_password = ?";
-            PreparedStatement pstmt = conn.prepareStatement(query);
-            pstmt.setInt(1, Integer.parseInt(boothIdStr));
-            pstmt.setString(2, password);
-
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                String boothName = rs.getString("booth_name");
-                int constituencyId = rs.getInt("constituency_id");
-                
-                if (loginListener != null) {
-                    loginListener.onLoginSuccess(Integer.parseInt(boothIdStr), boothName, constituencyId);
-                }
-            } else {
-                JOptionPane.showMessageDialog(this, "Invalid Booth ID or Password", "Login Failed", JOptionPane.ERROR_MESSAGE);
+        if (!isPasswordMode) {
+            String boothIdStr = boothIdField.getText().trim();
+            if (boothIdStr.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter Booth ID", "Login Error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Database Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
+            try (Connection conn = DatabaseHelper.getConnection()) {
+                String query = "SELECT * FROM Booths WHERE booth_id = ?";
+                PreparedStatement pstmt = conn.prepareStatement(query);
+                pstmt.setInt(1, Integer.parseInt(boothIdStr));
+                ResultSet rs = pstmt.executeQuery();
+                if (rs.next()) {
+                    if (loginListener != null) {
+                        loginListener.onLoginSuccess(rs.getInt("booth_id"), rs.getString("booth_name"), rs.getInt("constituency_id"));
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Invalid Booth ID", "Login Failed", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Database Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            String password = new String(passwordField.getPassword()).trim();
+            if (password.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter Password", "Login Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            try (Connection conn = DatabaseHelper.getConnection()) {
+                String query = "SELECT * FROM Booths WHERE booth_id = ? AND booth_password = ?";
+                PreparedStatement pstmt = conn.prepareStatement(query);
+                pstmt.setInt(1, prefilledBoothId);
+                pstmt.setString(2, password);
+                ResultSet rs = pstmt.executeQuery();
+                if (rs.next()) {
+                    if (loginListener != null) {
+                        loginListener.onLoginSuccess(rs.getInt("booth_id"), rs.getString("booth_name"), rs.getInt("constituency_id"));
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Invalid Password", "Login Failed", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Database Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 }
