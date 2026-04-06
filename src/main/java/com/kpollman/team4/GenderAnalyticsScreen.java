@@ -72,6 +72,7 @@ public class GenderAnalyticsScreen extends JPanel {
     }
 
     private void fetchGenderStats() {
+        boolean dataFound = false;
         try (Connection conn = DatabaseHelper.getConnection()) {
             String query = "SELECT SUM(male_votes) as male, SUM(female_votes) as female, SUM(third_gender_votes) as third FROM HourlyTurnout";
             PreparedStatement pstmt = conn.prepareStatement(query);
@@ -91,10 +92,21 @@ public class GenderAnalyticsScreen extends JPanel {
 
                     thirdGenderLabel.setText("Third Gender Turnout: " + String.format("%,d", third));
                     thirdGenderBar.setValue((third * 100) / total);
+                    dataFound = true;
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Gender stats fetch error: " + e.getMessage());
+        }
+
+        if (!dataFound) {
+            // Mock data for preview
+            maleLabel.setText("Male Turnout (Mock): 450,000");
+            maleBar.setValue(48);
+            femaleLabel.setText("Female Turnout (Mock): 480,000");
+            femaleBar.setValue(51);
+            thirdGenderLabel.setText("Third Gender Turnout (Mock): 10,000");
+            thirdGenderBar.setValue(1);
         }
     }
 }

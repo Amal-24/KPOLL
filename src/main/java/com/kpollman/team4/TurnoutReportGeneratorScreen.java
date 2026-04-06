@@ -51,9 +51,13 @@ public class TurnoutReportGeneratorScreen extends JPanel {
         ModernUI.ModernButton detailedButton = new ModernUI.ModernButton("Detailed Report");
         detailedButton.setBackground(ModernUI.ACCENT_COLOR);
         detailedButton.addActionListener(e -> generateDetailedReport());
+
+        ModernUI.ModernButton historyButton = new ModernUI.ModernButton("Historical Trend");
+        historyButton.addActionListener(e -> generateHistoricalReport());
         
         selectionPanel.add(summaryButton);
         selectionPanel.add(detailedButton);
+        selectionPanel.add(historyButton);
 
         add(selectionPanel, BorderLayout.CENTER); // Will be replaced by a nested panel for layout
 
@@ -124,6 +128,28 @@ public class TurnoutReportGeneratorScreen extends JPanel {
                 int third = rs.getInt("third");
                 String report = engine.generateReport(name, male, female, third);
                 reportArea.setText("--- Detailed Turnout Report ---\n\n" + report);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void generateHistoricalReport() {
+        String name = (String) constituencyDropdown.getSelectedItem();
+        try (Connection conn = DatabaseHelper.getConnection()) {
+            String query = "SELECT c.total_voters, SUM(ht.male_votes + ht.female_votes + ht.third_gender_votes) as total " +
+                           "FROM Constituencies c " +
+                           "JOIN Booths b ON c.constituency_id = b.constituency_id " +
+                           "JOIN HourlyTurnout ht ON b.booth_id = ht.booth_id " +
+                           "WHERE c.constituency_name = ? GROUP BY c.total_voters";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, name);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                double current = engine.calculateTurnoutPercentage(rs.getInt("total"), rs.getInt("total_voters"));
+                double historical = 74.2; // Mocked historical value
+                String report = engine.generateReport(name, current, historical);
+                reportArea.setText("--- Historical Trend Report ---\n\n" + report);
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,6 +1,7 @@
 package com.kpollman.team4;
 
 import com.kpollman.db.DatabaseHelper;
+import com.kpollman.ui.MainDashboard;
 import com.kpollman.ui.ModernUI;
 import javax.swing.*;
 import java.awt.*;
@@ -9,56 +10,79 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 /**
- * Hourly Turnout Updater Screen.
+ * Hourly Turnout Updater Screen as a JPanel for integration.
  */
-public class HourlyTurnoutUpdaterScreen extends JFrame {
+public class HourlyTurnoutUpdaterScreen extends JPanel {
     private int boothId;
     private JComboBox<Integer> hourDropdown;
-    private JTextField maleField, femaleField, thirdGenderField;
+    private ModernUI.ModernTextField maleField, femaleField, thirdGenderField;
     private ModernUI.ModernButton updateButton;
 
     public HourlyTurnoutUpdaterScreen(int boothId) {
         this.boothId = boothId;
-        setTitle("K-PollMan 2026 - Hourly Turnout Updater (Booth " + boothId + ")");
-        setSize(400, 400);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setLayout(new GridBagLayout());
+        setLayout(new BorderLayout());
+        setBackground(ModernUI.BACKGROUND_COLOR);
+        setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
 
+        // Header
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setOpaque(false);
+        JLabel titleLabel = new JLabel("Hourly Turnout Updater (Booth " + boothId + ")");
+        titleLabel.setFont(ModernUI.TITLE_FONT);
+        titleLabel.setForeground(ModernUI.TEXT_COLOR_DARK);
+        headerPanel.add(titleLabel, BorderLayout.WEST);
+        
+        ModernUI.ModernButton backBtn = new ModernUI.ModernButton("Back to Dashboard");
+        backBtn.addActionListener(e -> MainDashboard.showView(new TurnoutDashboard()));
+        headerPanel.add(backBtn, BorderLayout.EAST);
+        add(headerPanel, BorderLayout.NORTH);
+
+        // Content
+        ModernUI.RoundedPanel card = new ModernUI.RoundedPanel(30, ModernUI.CARD_BACKGROUND);
+        card.setLayout(new GridBagLayout());
+        card.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
+        
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(10, 0, 5, 0);
+        gbc.gridx = 0;
 
-        JLabel titleLabel = new JLabel("Update Hourly Turnout", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
-        add(titleLabel, gbc);
-
-        gbc.gridwidth = 1;
-        gbc.gridy = 1; add(new JLabel("Reporting Hour (24h):"), gbc);
+        gbc.gridy = 0;
+        card.add(new JLabel("Select Reporting Hour (24h)"), gbc);
         Integer[] hours = {7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
         hourDropdown = new JComboBox<>(hours);
-        gbc.gridx = 1; add(hourDropdown, gbc);
+        gbc.gridy = 1; gbc.insets = new Insets(0, 0, 15, 0);
+        card.add(hourDropdown, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2; add(new JLabel("Male Votes:"), gbc);
-        maleField = new JTextField(10);
-        gbc.gridx = 1; add(maleField, gbc);
+        gbc.gridy = 2; gbc.insets = new Insets(10, 0, 5, 0);
+        card.add(new JLabel("Male Votes Count"), gbc);
+        maleField = new ModernUI.ModernTextField("0");
+        gbc.gridy = 3; gbc.insets = new Insets(0, 0, 15, 0);
+        card.add(maleField, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3; add(new JLabel("Female Votes:"), gbc);
-        femaleField = new JTextField(10);
-        gbc.gridx = 1; add(femaleField, gbc);
+        gbc.gridy = 4; gbc.insets = new Insets(10, 0, 5, 0);
+        card.add(new JLabel("Female Votes Count"), gbc);
+        femaleField = new ModernUI.ModernTextField("0");
+        gbc.gridy = 5; gbc.insets = new Insets(0, 0, 15, 0);
+        card.add(femaleField, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 4; add(new JLabel("Third Gender Votes:"), gbc);
-        thirdGenderField = new JTextField(10);
-        gbc.gridx = 1; add(thirdGenderField, gbc);
+        gbc.gridy = 6; gbc.insets = new Insets(10, 0, 5, 0);
+        card.add(new JLabel("Third Gender Votes Count"), gbc);
+        thirdGenderField = new ModernUI.ModernTextField("0");
+        gbc.gridy = 7; gbc.insets = new Insets(0, 0, 25, 0);
+        card.add(thirdGenderField, gbc);
 
-        updateButton = new ModernUI.ModernButton("Save Turnout Data");
-        gbc.gridx = 0; gbc.gridy = 5; gbc.gridwidth = 2;
-        add(updateButton, gbc);
+        updateButton = new ModernUI.ModernButton("Save Hourly Turnout");
+        updateButton.setBackground(ModernUI.PRIMARY_COLOR);
+        gbc.gridy = 8;
+        card.add(updateButton, gbc);
+
+        JPanel centerWrapper = new JPanel(new GridBagLayout());
+        centerWrapper.setOpaque(false);
+        centerWrapper.add(card);
+        add(centerWrapper, BorderLayout.CENTER);
 
         updateButton.addActionListener(e -> updateTurnout());
-        
-        // Load existing data for selected hour
         hourDropdown.addActionListener(e -> fetchCurrentTurnout());
         fetchCurrentTurnout();
     }
@@ -104,14 +128,17 @@ public class HourlyTurnoutUpdaterScreen extends JFrame {
                 pstmt.setInt(6, male);
                 pstmt.setInt(7, female);
                 pstmt.setInt(8, third);
-
+                
                 int rowsAffected = pstmt.executeUpdate();
                 if (rowsAffected > 0) {
-                    JOptionPane.showMessageDialog(this, "Turnout data updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Hourly turnout updated successfully!");
+                    MainDashboard.showView(new TurnoutDashboard());
                 }
             }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Please enter valid integers");
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error updating turnout: " + ex.getMessage());
         }
     }
 }

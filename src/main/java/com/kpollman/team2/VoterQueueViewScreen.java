@@ -93,32 +93,21 @@ public class VoterQueueViewScreen extends JPanel {
                 waitTimeLabel.setText(waitTime + " mins");
                 
                 if (waitTime < 15) {
-                    suggestionLabel.setText("Optimal time to visit!");
+                    suggestionLabel.setText("Recommendation: Optimal time to visit!");
                     suggestionLabel.setForeground(new Color(16, 185, 129));
                 } else if (waitTime < 30) {
-                    suggestionLabel.setText("Moderate queue.");
-                    suggestionLabel.setForeground(new Color(59, 130, 246));
+                    suggestionLabel.setText("Recommendation: Moderate queue. Plan accordingly.");
+                    suggestionLabel.setForeground(new Color(245, 158, 11));
                 } else {
-                    suggestionLabel.setText("Heavy queue. Consider visiting later.");
+                    suggestionLabel.setText("Recommendation: Long wait. Visit later if possible.");
                     suggestionLabel.setForeground(new Color(239, 68, 68));
                 }
             } else {
-                String boothQuery = "SELECT booth_name FROM Booths WHERE booth_id = ?";
-                PreparedStatement bpstmt = conn.prepareStatement(boothQuery);
-                bpstmt.setInt(1, boothId);
-                ResultSet brs = bpstmt.executeQuery();
-                if (brs.next()) {
-                    boothNameLabel.setText(brs.getString("booth_name"));
-                    queueLengthLabel.setText("No Data");
-                    waitTimeLabel.setText("No Data");
-                    suggestionLabel.setText("No current queue data available.");
-                    suggestionLabel.setForeground(ModernUI.ACCENT_COLOR);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Booth ID not found");
-                }
+                suggestionLabel.setText("No real-time data available for this booth.");
+                suggestionLabel.setForeground(Color.GRAY);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
         }
     }
 }

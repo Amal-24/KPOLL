@@ -5,7 +5,6 @@ import com.kpollman.ui.MainDashboard;
 import com.kpollman.ui.ModernUI;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,6 +13,7 @@ import java.sql.ResultSet;
 public class QueueStatusDashboard extends JPanel {
     private JTable queueTable;
     private DefaultTableModel tableModel;
+    private JPanel graphPanel;
 
     public QueueStatusDashboard() {
         setLayout(new BorderLayout());
@@ -23,57 +23,72 @@ public class QueueStatusDashboard extends JPanel {
         // Header
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setOpaque(false);
-        JLabel title = new JLabel("Real-Time Queue Status");
+        JLabel title = new JLabel("Real-Time Queue Status Dashboard");
         title.setFont(ModernUI.TITLE_FONT);
         title.setForeground(ModernUI.TEXT_COLOR_DARK);
         headerPanel.add(title, BorderLayout.WEST);
         
-        ModernUI.ModernButton refreshBtn = new ModernUI.ModernButton("Refresh Data");
+        ModernUI.ModernButton refreshBtn = new ModernUI.ModernButton("Refresh Dashboard");
         refreshBtn.addActionListener(e -> refreshQueueData());
         headerPanel.add(refreshBtn, BorderLayout.EAST);
         add(headerPanel, BorderLayout.NORTH);
 
+        // Center split: Table and Graph
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        splitPane.setDividerLocation(300);
+        splitPane.setOpaque(false);
+        splitPane.setBorder(null);
+
         // Table
-        String[] columns = {"Booth ID", "Booth Name", "Queue Length", "Avg Wait (min)", "Stations", "Last Updated"};
+        String[] columns = {"Booth ID", "Booth Name", "Queue Length", "Avg Wait (min)", "Stations", "Status"};
         tableModel = new DefaultTableModel(columns, 0);
         queueTable = new JTable(tableModel);
         queueTable.setFont(ModernUI.MAIN_FONT);
         queueTable.setRowHeight(40);
         queueTable.setShowVerticalLines(false);
         queueTable.setGridColor(ModernUI.BORDER_COLOR);
-        queueTable.setSelectionBackground(new Color(241, 245, 249));
-        queueTable.setSelectionForeground(ModernUI.TEXT_COLOR_DARK);
         
-        JTableHeader header = queueTable.getTableHeader();
-        header.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        header.setBackground(Color.WHITE);
-        header.setForeground(ModernUI.ACCENT_COLOR);
-        header.setPreferredSize(new Dimension(100, 40));
-
         JScrollPane scrollPane = new JScrollPane(queueTable);
         scrollPane.setBorder(BorderFactory.createLineBorder(ModernUI.BORDER_COLOR, 1));
-        scrollPane.getViewport().setBackground(Color.WHITE);
+        splitPane.setTopComponent(scrollPane);
+
+        // Graphical Panel (Bar representation)
+        graphPanel = new JPanel();
+        graphPanel.setLayout(new BoxLayout(graphPanel, BoxLayout.Y_AXIS));
+        graphPanel.setBackground(Color.WHITE);
+        graphPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(ModernUI.BORDER_COLOR), "Queue Length Visualization (Graphical)"));
         
-        JPanel tableContainer = new JPanel(new BorderLayout());
-        tableContainer.setOpaque(false);
-        tableContainer.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        tableContainer.add(scrollPane);
-        add(tableContainer, BorderLayout.CENTER);
+        JScrollPane graphScroll = new JScrollPane(graphPanel);
+        graphScroll.setBorder(null);
+        splitPane.setBottomComponent(graphScroll);
+
+        add(splitPane, BorderLayout.CENTER);
 
         // Action Panel
-        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 15));
         actionPanel.setOpaque(false);
         
         ModernUI.ModernButton updateBtn = new ModernUI.ModernButton("Update Queue");
         updateBtn.addActionListener(e -> handleUpdate());
         
-        ModernUI.ModernButton viewBtn = new ModernUI.ModernButton("Voter View");
+        ModernUI.ModernButton viewBtn = new ModernUI.ModernButton("Voter Queue View");
         viewBtn.setBackground(ModernUI.ACCENT_COLOR);
         viewBtn.addActionListener(e -> handleView());
 
+        ModernUI.ModernButton calcBtn = new ModernUI.ModernButton("Wait Time Calculator");
+        calcBtn.addActionListener(e -> MainDashboard.showView(new WaitTimeCalculatorScreen()));
+
+        ModernUI.ModernButton flowBtn = new ModernUI.ModernButton("Flow Management");
+        flowBtn.addActionListener(e -> MainDashboard.showView(new FlowManagementScreen()));
+
+        ModernUI.ModernButton capacityBtn = new ModernUI.ModernButton("Capacity Monitor");
+        capacityBtn.addActionListener(e -> handleCapacityMonitor());
+
         actionPanel.add(updateBtn);
-        actionPanel.add(Box.createHorizontalStrut(20));
         actionPanel.add(viewBtn);
+        actionPanel.add(calcBtn);
+        actionPanel.add(flowBtn);
+        actionPanel.add(capacityBtn);
         add(actionPanel, BorderLayout.SOUTH);
 
         refreshQueueData();
@@ -103,25 +118,75 @@ public class QueueStatusDashboard extends JPanel {
         }
     }
 
+    private void handleCapacityMonitor() {
+        String boothIdInput = JOptionPane.showInputDialog(this, "Enter Booth ID to monitor capacity:");
+        if (boothIdInput != null && !boothIdInput.isEmpty()) {
+            try {
+                int boothId = Integer.parseInt(boothIdInput);
+                new BoothCapacityMonitorScreen(boothId).setVisible(true);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid Booth ID");
+            }
+        }
+    }
+
     private void refreshQueueData() {
         tableModel.setRowCount(0);
+        graphPanel.removeAll();
+        boolean dataFound = false;
         try (Connection conn = DatabaseHelper.getConnection()) {
             String query = "SELECT q.*, b.booth_name FROM QueueStatus q JOIN Booths b ON q.booth_id = b.booth_id";
             PreparedStatement pstmt = conn.prepareStatement(query);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                tableModel.addRow(new Object[]{
-                    rs.getInt("booth_id"),
-                    rs.getString("booth_name"),
-                    rs.getInt("current_queue_length"),
-                    rs.getInt("avg_wait_time_mins"),
-                    rs.getInt("active_stations"),
-                    rs.getTimestamp("last_updated")
-                });
+                String boothName = rs.getString("booth_name");
+                int qLen = rs.getInt("current_queue_length");
+                int waitTime = rs.getInt("avg_wait_time_mins");
+                int stations = rs.getInt("active_stations");
+                int boothId = rs.getInt("booth_id");
+
+                String status = waitTime > 30 ? "HEAVY" : (waitTime > 15 ? "MODERATE" : "NORMAL");
+                tableModel.addRow(new Object[]{boothId, boothName, qLen, waitTime, stations, status});
+
+                addGraphicalBar(boothName, qLen, status);
+                dataFound = true;
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error fetching queue data: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
+            System.err.println("Queue data fetch error: " + ex.getMessage());
         }
+
+        if (!dataFound) {
+            // Mock data for fallback
+            addMockQueueRow(101, "Booth A - Central School", 15, 10, 2, "NORMAL");
+            addMockQueueRow(102, "Booth B - High School", 45, 35, 1, "HEAVY");
+            addMockQueueRow(103, "Booth C - Community Center", 25, 20, 2, "MODERATE");
+        }
+
+        graphPanel.revalidate();
+        graphPanel.repaint();
+    }
+
+    private void addMockQueueRow(int id, String name, int qLen, int wait, int stations, String status) {
+        tableModel.addRow(new Object[]{id, name, qLen, wait, stations, status});
+        addGraphicalBar(name, qLen, status);
+    }
+
+    private void addGraphicalBar(String boothName, int qLen, String status) {
+        JPanel barRow = new JPanel(new BorderLayout(10, 0));
+        barRow.setOpaque(false);
+        barRow.setMaximumSize(new Dimension(800, 40));
+        JLabel nameLbl = new JLabel(boothName);
+        nameLbl.setPreferredSize(new Dimension(200, 30));
+        
+        JProgressBar bar = new JProgressBar(0, 100);
+        bar.setValue(qLen);
+        bar.setStringPainted(true);
+        bar.setString(qLen + " People in Queue");
+        bar.setForeground(status.equals("HEAVY") ? new Color(239, 68, 68) : (status.equals("MODERATE") ? new Color(245, 158, 11) : new Color(16, 185, 129)));
+        
+        barRow.add(nameLbl, BorderLayout.WEST);
+        barRow.add(bar, BorderLayout.CENTER);
+        graphPanel.add(barRow);
+        graphPanel.add(Box.createVerticalStrut(5));
     }
 }

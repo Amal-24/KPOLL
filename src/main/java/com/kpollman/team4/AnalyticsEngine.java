@@ -11,6 +11,7 @@ public abstract class AnalyticsEngine {
      */
     public abstract String generateReport(String constituencyName, int turnout);
     public abstract String generateReport(String constituencyName, int male, int female, int third);
+    public abstract String generateReport(String constituencyName, double current, double historical);
 }
 
 class KeralaElectionAnalytics extends AnalyticsEngine {
@@ -22,11 +23,28 @@ class KeralaElectionAnalytics extends AnalyticsEngine {
 
     @Override
     public String generateReport(String constituencyName, int turnout) {
-        return "Constituency: " + constituencyName + " | Total Turnout: " + turnout;
+        return "Turnout Summary for " + constituencyName + ":\n" +
+               "Total Votes Counted: " + String.format("%,d", turnout);
     }
 
     @Override
     public String generateReport(String constituencyName, int male, int female, int third) {
-        return String.format("Constituency: %s | M: %d, F: %d, TG: %d", constituencyName, male, female, third);
+        int total = male + female + third;
+        return String.format("Detailed Gender Breakdown for %s:\n" +
+                             "Male: %d (%.1f%%)\n" +
+                             "Female: %d (%.1f%%)\n" +
+                             "Third Gender: %d (%.1f%%)\n" +
+                             "Total: %d", 
+                             constituencyName, male, (male*100.0/total), female, (female*100.0/total), third, (third*100.0/total), total);
+    }
+
+    @Override
+    public String generateReport(String constituencyName, double current, double historical) {
+        double diff = current - historical;
+        return String.format("Historical Trend for %s:\n" +
+                             "Current Turnout: %.2f%%\n" +
+                             "Previous Turnout: %.2f%%\n" +
+                             "Swing: %+.2f%%", 
+                             constituencyName, current, historical, diff);
     }
 }
