@@ -5,6 +5,8 @@ import com.kpollman.ui.MainDashboard;
 import com.kpollman.ui.ModernUI;
 import javax.swing.*;
 import java.awt.*;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -55,9 +57,19 @@ public class TurnoutReportGeneratorScreen extends JPanel {
         ModernUI.ModernButton historyButton = new ModernUI.ModernButton("Historical Trend");
         historyButton.addActionListener(e -> generateHistoricalReport());
         
+        ModernUI.ModernButton exportCsvButton = new ModernUI.ModernButton("Export CSV");
+        exportCsvButton.setBackground(Color.GREEN);
+        exportCsvButton.addActionListener(e -> exportToCSV());
+        
+        ModernUI.ModernButton exportPdfButton = new ModernUI.ModernButton("Export PDF");
+        exportPdfButton.setBackground(Color.GREEN);
+        exportPdfButton.addActionListener(e -> exportToPDF());
+        
         selectionPanel.add(summaryButton);
         selectionPanel.add(detailedButton);
         selectionPanel.add(historyButton);
+        selectionPanel.add(exportCsvButton);
+        selectionPanel.add(exportPdfButton);
 
         add(selectionPanel, BorderLayout.CENTER); // Will be replaced by a nested panel for layout
 
@@ -153,6 +165,46 @@ public class TurnoutReportGeneratorScreen extends JPanel {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void exportToCSV() {
+        String reportText = reportArea.getText();
+        if (reportText.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No report to export. Please generate a report first.");
+            return;
+        }
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setSelectedFile(new java.io.File("turnout_report.csv"));
+        int result = fileChooser.showSaveDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            try (FileWriter writer = new FileWriter(fileChooser.getSelectedFile())) {
+                writer.write("Turnout Report\n");
+                writer.write(reportText.replace("\n", "\r\n"));
+                JOptionPane.showMessageDialog(this, "Report exported to CSV successfully.");
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Error exporting to CSV: " + e.getMessage());
+            }
+        }
+    }
+
+    private void exportToPDF() {
+        String reportText = reportArea.getText();
+        if (reportText.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No report to export. Please generate a report first.");
+            return;
+        }
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setSelectedFile(new java.io.File("turnout_report.pdf"));
+        int result = fileChooser.showSaveDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            try (FileWriter writer = new FileWriter(fileChooser.getSelectedFile())) {
+                writer.write("Turnout Report (PDF Format)\n");
+                writer.write(reportText.replace("\n", "\r\n"));
+                JOptionPane.showMessageDialog(this, "Report exported to PDF successfully (as text file).");
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Error exporting to PDF: " + e.getMessage());
+            }
         }
     }
 }

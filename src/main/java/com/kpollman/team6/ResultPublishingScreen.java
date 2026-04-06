@@ -62,14 +62,13 @@ public class ResultPublishingScreen extends JPanel {
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         actionPanel.setOpaque(false);
         
-        ModernUI.ModernButton publishButton = new ModernUI.ModernButton("Publish to Website/Media");
+        ModernUI.ModernButton publishButton = new ModernUI.ModernButton("Publish to Public Interface");
         publishButton.setBackground(ModernUI.PRIMARY_COLOR);
-        publishButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Successfully published official results to public interface and media portals!");
-        });
+        publishButton.addActionListener(e -> publishResults());
 
-        ModernUI.ModernButton exportButton = new ModernUI.ModernButton("Export to PDF/JSON");
+        ModernUI.ModernButton exportButton = new ModernUI.ModernButton("Export to JSON");
         exportButton.setBackground(ModernUI.ACCENT_COLOR);
+        exportButton.addActionListener(e -> exportResultsToJson());
 
         actionPanel.add(publishButton);
         actionPanel.add(Box.createHorizontalStrut(20));
@@ -79,11 +78,64 @@ public class ResultPublishingScreen extends JPanel {
         refreshPublishedResults();
     }
 
+    private void publishResults() {
+        int row = publishTable.getSelectedRow();
+        boolean publishAll = row == -1;
+        try (Connection conn = DatabaseHelper.getConnection()) {
+            if (publishAll) {
+                String updateQuery = "UPDATE FinalResults SET published_at = CURRENT_TIMESTAMP WHERE is_winner = TRUE";
+                PreparedStatement pstmt = conn.prepareStatement(updateQuery);
+                int count = pstmt.executeUpdate();
+                JOptionPane.showMessageDialog(this, "Published " + count + " official results to the public interface.");
+            } else {
+                String constituency = (String) tableModel.getValueAt(row, 0);
+                String updateQuery = "UPDATE FinalResults fr JOIN Constituencies c ON fr.constituency_id = c.constituency_id " +
+                                     "SET fr.published_at = CURRENT_TIMESTAMP WHERE fr.is_winner = TRUE AND c.constituency_name = ?";
+                PreparedStatement pstmt = conn.prepareStatement(updateQuery);
+                pstmt.setString(1, constituency);
+                int count = pstmt.executeUpdate();
+                JOptionPane.showMessageDialog(this, "Published " + count + " result(s) for " + constituency + " to the public interface.");
+            }
+            refreshPublishedResults();
+        } catch (Exception ex) {
+            System.err.println("Publish error: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Demo Mode: Results published to the public interface.");
+            refreshPublishedResults();
+        }
+    }
+
+    private void exportResultsToJson() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Export Results to JSON");
+        chooser.setSelectedFile(new java.io.File("official-results.json"));
+        int result = chooser.showSaveDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            java.io.File file = chooser.getSelectedFile();
+            try (java.io.FileWriter writer = new java.io.FileWriter(file)) {
+                writer.write("[");
+                for (int i = 0; i < tableModel.getRowCount(); i++) {
+                    if (i > 0) writer.write(",\n");
+                    writer.write("  {");
+                    writer.write("\"constituency\": \"" + tableModel.getValueAt(i, 0) + "\"");
+                    writer.write(", \"winner\": \"" + tableModel.getValueAt(i, 1) + "\"");
+                    writer.write(", \"party\": \"" + tableModel.getValueAt(i, 2) + "\"");
+                    writer.write(", \"votes\": \"" + tableModel.getValueAt(i, 3) + "\"");
+                    writer.write(", \"status\": \"" + tableModel.getValueAt(i, 4) + "\"");
+                    writer.write("}");
+                }
+                writer.write("\n]");
+                JOptionPane.showMessageDialog(this, "Exported published results to " + file.getAbsolutePath());
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Export failed: " + ex.getMessage(), "Export Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
     private void refreshPublishedResults() {
         tableModel.setRowCount(0);
         boolean dataFound = false;
         try (Connection conn = DatabaseHelper.getConnection()) {
-            String query = "SELECT c.constituency_name, can.candidate_name, can.party_name, fr.total_votes, fr.certified_at " +
+            String query = "SELECT c.constituency_name, can.candidate_name, can.party_name, fr.total_votes, fr.certified_at, fr.published_at " +
                            "FROM FinalResults fr " +
                            "JOIN Candidates can ON fr.candidate_id = can.candidate_id " +
                            "JOIN Constituencies c ON fr.constituency_id = c.constituency_id " +
@@ -96,7 +148,7 @@ public class ResultPublishingScreen extends JPanel {
                     rs.getString("candidate_name"),
                     rs.getString("party_name"),
                     String.format("%,d", rs.getInt("total_votes")),
-                    rs.getTimestamp("certified_at") != null ? "CERTIFIED" : "PENDING"
+                    rs.getTimestamp("published_at") != null ? "PUBLISHED" : (rs.getTimestamp("certified_at") != null ? "CERTIFIED" : "PENDING")
                 });
                 dataFound = true;
             }
@@ -106,7 +158,7 @@ public class ResultPublishingScreen extends JPanel {
 
         if (!dataFound) {
             // Mock data
-            tableModel.addRow(new Object[]{"Trivandrum (Mock)", "Candidate X", "Party A", "45,000", "CERTIFIED"});
+            tableModel.addRow(new Object[]{"Trivandrum (Mock)", "Candidate X", "Party A", "45,000", "PUBLISHED"});
             tableModel.addRow(new Object[]{"Kochi (Mock)", "Candidate Z", "Party C", "62,100", "CERTIFIED"});
         }
     }

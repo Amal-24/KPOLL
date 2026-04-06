@@ -74,11 +74,17 @@ public class WinnerDeclarationScreen extends JPanel {
         certifyBtn.setBackground(ModernUI.PRIMARY_COLOR);
         certifyBtn.addActionListener(e -> MainDashboard.showView(new ResultCertificationScreen()));
 
+        ModernUI.ModernButton publishBtn = new ModernUI.ModernButton("Publish Results");
+        publishBtn.setBackground(ModernUI.ACCENT_COLOR.darker());
+        publishBtn.addActionListener(e -> MainDashboard.showView(new ResultPublishingScreen()));
+
         actionPanel.add(refreshBtn);
         actionPanel.add(Box.createHorizontalStrut(20));
         actionPanel.add(declareBtn);
         actionPanel.add(Box.createHorizontalStrut(20));
         actionPanel.add(certifyBtn);
+        actionPanel.add(Box.createHorizontalStrut(20));
+        actionPanel.add(publishBtn);
         add(actionPanel, BorderLayout.SOUTH);
 
         refreshWinners();

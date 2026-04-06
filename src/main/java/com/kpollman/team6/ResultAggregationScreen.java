@@ -70,6 +70,14 @@ public class ResultAggregationScreen extends JPanel {
         winnerBtn.setBackground(ModernUI.ACCENT_COLOR);
         winnerBtn.addActionListener(e -> MainDashboard.showView(new WinnerDeclarationScreen()));
 
+        ModernUI.ModernButton certifyBtn = new ModernUI.ModernButton("Result Certification");
+        certifyBtn.setBackground(ModernUI.PRIMARY_COLOR);
+        certifyBtn.addActionListener(e -> MainDashboard.showView(new ResultCertificationScreen()));
+
+        ModernUI.ModernButton publishBtn = new ModernUI.ModernButton("Publish Results");
+        publishBtn.setBackground(ModernUI.ACCENT_COLOR.darker());
+        publishBtn.addActionListener(e -> MainDashboard.showView(new ResultPublishingScreen()));
+
         ModernUI.ModernButton marginBtn = new ModernUI.ModernButton("Margin Calculation");
         marginBtn.setBackground(ModernUI.PRIMARY_COLOR);
         marginBtn.addActionListener(e -> MainDashboard.showView(new MarginCalculationScreen()));
@@ -89,6 +97,10 @@ public class ResultAggregationScreen extends JPanel {
         actionPanel.add(detailsBtn);
         actionPanel.add(Box.createHorizontalStrut(20));
         actionPanel.add(winnerBtn);
+        actionPanel.add(Box.createHorizontalStrut(20));
+        actionPanel.add(certifyBtn);
+        actionPanel.add(Box.createHorizontalStrut(20));
+        actionPanel.add(publishBtn);
         actionPanel.add(Box.createHorizontalStrut(20));
         actionPanel.add(marginBtn);
         add(actionPanel, BorderLayout.SOUTH);
