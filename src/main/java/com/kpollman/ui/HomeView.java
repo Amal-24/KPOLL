@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class HomeView extends JPanel {
-    public HomeView() {
+    public HomeView(int boothId, String boothName) {
         setBackground(ModernUI.BACKGROUND_COLOR);
         setLayout(new BorderLayout());
         setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
@@ -20,6 +20,13 @@ public class HomeView extends JPanel {
         welcomeLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         mainPanel.add(welcomeLabel);
         mainPanel.add(Box.createVerticalStrut(10));
+
+        JLabel boothInfoLabel = new JLabel("Logged in Booth: " + boothId + " - " + boothName);
+        boothInfoLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        boothInfoLabel.setForeground(ModernUI.ACCENT_COLOR);
+        boothInfoLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        mainPanel.add(boothInfoLabel);
+        mainPanel.add(Box.createVerticalStrut(20));
 
         JLabel subtitleLabel = new JLabel("Integrated Election Management System");
         subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));

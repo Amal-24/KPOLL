@@ -50,15 +50,15 @@ public class BoothLoginScreen extends JPanel {
         gbc.insets = new Insets(10, 0, 10, 0);
 
         // Title
-        JLabel titleLabel = new JLabel(isPasswordMode ? "Verify Password" : "Booth ID Entry", JLabel.CENTER);
+        JLabel titleLabel = new JLabel(isPasswordMode ? "Verify Booth Password" : "Booth Login", JLabel.CENTER);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 36));
         titleLabel.setForeground(ModernUI.TEXT_COLOR_DARK);
         gbc.gridy = 0;
         loginCard.add(titleLabel, gbc);
 
         // Subtitle
-        JLabel subtitleLabel = new JLabel("K-PollMan 2026", JLabel.CENTER);
-        subtitleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        JLabel subtitleLabel = new JLabel(isPasswordMode ? "Enter your booth password to access Dashboard" : "Enter your Booth ID to continue", JLabel.CENTER);
+        subtitleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         subtitleLabel.setForeground(ModernUI.ACCENT_COLOR);
         gbc.gridy = 1;
         loginCard.add(subtitleLabel, gbc);
@@ -77,8 +77,20 @@ public class BoothLoginScreen extends JPanel {
             gbc.insets = new Insets(0, 0, 15, 0);
             loginCard.add(boothIdField, gbc);
         } else {
+            // Booth ID (read-only)
+            JLabel boothIdLabel = new JLabel("Booth ID");
+            boothIdLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            gbc.gridy = 2;
+            loginCard.add(boothIdLabel, gbc);
+
+            ModernUI.ModernTextField boothIdDisplay = new ModernUI.ModernTextField(String.valueOf(boothId));
+            boothIdDisplay.setEnabled(false);
+            gbc.gridy = 3;
+            gbc.insets = new Insets(0, 0, 15, 0);
+            loginCard.add(boothIdDisplay, gbc);
+
             // Password
-            JLabel passwordLabel = new JLabel("Enter Password for Booth #" + boothId);
+            JLabel passwordLabel = new JLabel("Password");
             passwordLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
             gbc.gridy = 4;
             gbc.insets = new Insets(10, 0, 5, 0);
@@ -96,7 +108,7 @@ public class BoothLoginScreen extends JPanel {
         }
 
         // Login Button
-        loginButton = new ModernUI.ModernButton(isPasswordMode ? "Verify" : "Next");
+        loginButton = new ModernUI.ModernButton(isPasswordMode ? "Verify" : "Login");
         loginButton.setBackground(ModernUI.PRIMARY_COLOR);
         gbc.gridy = 6;
         gbc.insets = new Insets(10, 0, 20, 0);
