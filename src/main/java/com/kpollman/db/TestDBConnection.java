@@ -9,7 +9,7 @@ public class TestDBConnection {
     public static void main(String[] args) {
         String url = "jdbc:mysql://mysql-2276d50ckpolljava26.h.aivencloud.com:24584/kpollman2026?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true&connectTimeout=10000&socketTimeout=10000";
         String user = "avnadmin";
-        String password = "AVNS_qXT_6ug8qNJui7XSlsx"; // User should replace this manually for testing
+        String password = ""; // User should replace this manually for testing
 
         System.out.println("Attempting to connect to: " + url);
         
