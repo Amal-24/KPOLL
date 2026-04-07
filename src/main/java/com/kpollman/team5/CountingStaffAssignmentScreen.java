@@ -74,11 +74,7 @@ public class CountingStaffAssignmentScreen extends JPanel {
 
     private void refreshStaffList() {
         tableModel.setRowCount(0);
-        // Mock staff data
-        tableModel.addRow(new Object[]{"Officer A", "Supervisor", "Table 1", "Trivandrum Central", "Assigned"});
-        tableModel.addRow(new Object[]{"Officer B", "Supervisor", "Table 2", "Trivandrum Central", "Assigned"});
-        tableModel.addRow(new Object[]{"Assistant X", "Counting Assistant", "Table 1", "Trivandrum Central", "Assigned"});
-        tableModel.addRow(new Object[]{"Assistant Y", "Counting Assistant", "Table 2", "Trivandrum Central", "Assigned"});
-        tableModel.addRow(new Object[]{"Officer C", "Supervisor", "Unassigned", "Kochi Collectorate", "Pending"});
+        // Note: Implement database fetch for staff assignments when database schema is updated
+        // For now, showing placeholder
     }
 }

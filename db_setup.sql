@@ -127,6 +127,7 @@ CREATE TABLE IF NOT EXISTS FinalResults (
 INSERT INTO Constituencies (constituency_name, total_voters) VALUES ('Thiruvananthapuram', 150000);
 INSERT INTO Booths (booth_name, constituency_id, booth_type) VALUES ('Booth 1 - Central School', 1, 'Urban');
 INSERT INTO Candidates (candidate_name, party_name, constituency_id) VALUES ('John Doe', 'Party A', 1), ('Jane Smith', 'Party B', 1);
+INSERT INTO QueueStatus (booth_id, current_queue_length, avg_wait_time_mins, active_stations) VALUES (1, 0, 0, 1);
 
 
 

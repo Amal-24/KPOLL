@@ -115,10 +115,7 @@ public class ConstituencyWiseTrendsScreen extends JPanel {
         }
 
         if (!dataFound) {
-            // Mock trends
-            tableModel.addRow(new Object[]{"Trivandrum", "John Doe", "Party A", "Jane Smith", "Party B", "5,200", "CLOSE FIGHT"});
-            tableModel.addRow(new Object[]{"Kochi", "Alice Brown", "Party B", "Bob White", "Party A", "15,400", "SAFE LEAD"});
-            tableModel.addRow(new Object[]{"Kozhikode", "Charlie Green", "Party C", "Dave Blue", "Party B", "800", "TIGHT CONTEST"});
+            tableModel.addRow(new Object[]{"No Data", "-", "-", "-", "-", "0", "N/A"});
         }
     }
 }

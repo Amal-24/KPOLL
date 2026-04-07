@@ -110,10 +110,7 @@ public class ResultVerificationScreen extends JPanel {
         }
 
         if (!dataFound) {
-            // Mock data
-            tableModel.addRow(new Object[]{"Trivandrum", 1, "Candidate A", 4500, "Pending"});
-            tableModel.addRow(new Object[]{"Trivandrum", 1, "Candidate B", 4200, "Pending"});
-            tableModel.addRow(new Object[]{"Kochi", 1, "Candidate C", 5100, "Verified"});
+            tableModel.addRow(new Object[]{"No Data", 0, "-", 0, "N/A"});
         }
     }
 }

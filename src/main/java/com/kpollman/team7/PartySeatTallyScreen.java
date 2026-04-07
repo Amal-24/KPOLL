@@ -101,11 +101,7 @@ public class PartySeatTallyScreen extends JPanel {
         }
 
         if (!dataFound) {
-            // Mock data
-            addTallyRow("LDF (Mock)", 91, totalSeats);
-            addTallyRow("UDF (Mock)", 41, totalSeats);
-            addTallyRow("NDA (Mock)", 2, totalSeats);
-            addTallyRow("OTH (Mock)", 6, totalSeats);
+            // No party seat data available
         }
         
         chartPanel.revalidate();

@@ -51,7 +51,10 @@ public class FlowManagementScreen extends JPanel {
         suggestionsPanel.removeAll();
         boolean dataFound = false;
         try (Connection conn = DatabaseHelper.getConnection()) {
-            String query = "SELECT q.*, b.booth_name FROM QueueStatus q JOIN Booths b ON q.booth_id = b.booth_id";
+            String query = "SELECT b.booth_name, COALESCE(q.current_queue_length, 0) as current_queue_length, " +
+                          "COALESCE(q.active_stations, 1) as active_stations, " +
+                          "COALESCE(q.avg_wait_time_mins, 0) as avg_wait_time_mins " +
+                          "FROM Booths b LEFT JOIN QueueStatus q ON b.booth_id = q.booth_id";
             PreparedStatement pstmt = conn.prepareStatement(query);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -68,10 +71,8 @@ public class FlowManagementScreen extends JPanel {
         }
 
         if (!dataFound) {
-            // Mock suggestions
-            processSuggestion("Booth A (Mock)", 12, 2, 8);
-            processSuggestion("Booth B (Mock)", 55, 1, 52);
-            processSuggestion("Booth C (Mock)", 32, 2, 34);
+            // No data available - show empty state
+            addSuggestionCard("No Data", 0, 0, 0, "No booth data available. Please configure booths first.", Color.GRAY);
         }
 
         suggestionsPanel.revalidate();

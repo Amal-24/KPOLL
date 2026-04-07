@@ -123,7 +123,7 @@ public class ResultAggregationScreen extends JPanel {
             refreshAggregation();
         } catch (Exception ex) {
             System.err.println("Aggregation error: " + ex.getMessage());
-            JOptionPane.showMessageDialog(this, "Demo Mode: Aggregation simulation successful.");
+            JOptionPane.showMessageDialog(this, "Error aggregating results: " + ex.getMessage());
         }
     }
 
@@ -153,10 +153,7 @@ public class ResultAggregationScreen extends JPanel {
         }
 
         if (!dataFound) {
-            // Mock data
-            tableModel.addRow(new Object[]{1, "Candidate X (Mock)", "Trivandrum", "45,000"});
-            tableModel.addRow(new Object[]{2, "Candidate Y (Mock)", "Trivandrum", "41,500"});
-            tableModel.addRow(new Object[]{3, "Candidate Z (Mock)", "Kochi", "62,100"});
+            tableModel.addRow(new Object[]{0, "No results aggregated", "-", "0"});
         }
     }
 }

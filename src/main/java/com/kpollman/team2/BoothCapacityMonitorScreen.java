@@ -53,7 +53,9 @@ public class BoothCapacityMonitorScreen extends JFrame {
 
     private void refreshCapacity() {
         try (Connection conn = DatabaseHelper.getConnection()) {
-            String query = "SELECT current_queue_length, active_stations FROM QueueStatus WHERE booth_id = ?";
+            String query = "SELECT COALESCE(q.current_queue_length, 0) as current_queue_length, " +
+                          "COALESCE(q.active_stations, 1) as active_stations " +
+                          "FROM Booths b LEFT JOIN QueueStatus q ON b.booth_id = q.booth_id WHERE b.booth_id = ?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setInt(1, boothId);
             ResultSet rs = pstmt.executeQuery();

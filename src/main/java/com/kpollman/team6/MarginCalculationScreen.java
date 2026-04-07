@@ -107,9 +107,7 @@ public class MarginCalculationScreen extends JPanel {
         }
 
         if (!dataFound) {
-            // Mock data
-            tableModel.addRow(new Object[]{1, "Trivandrum (Mock)", "Candidate X", "Candidate Y", "3,500", "48.20%"});
-            tableModel.addRow(new Object[]{2, "Kochi (Mock)", "Candidate Z", "Candidate W", "12,100", "55.45%"});
+            tableModel.addRow(new Object[]{0, "No margin data available", "-", "-", "0", "0%"});
         }
     }
 }

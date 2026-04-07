@@ -69,11 +69,7 @@ public class CountingProgressTrackerScreen extends JPanel {
         }
 
         if (!dataFound) {
-            // Mock data
-            addProgressBar("Thiruvananthapuram (Mock)", 12, 20);
-            addProgressBar("Ernakulam (Mock)", 8, 20);
-            addProgressBar("Kozhikode (Mock)", 15, 20);
-            addProgressBar("Wayanad (Mock)", 20, 20);
+            // No counting progress data available
         }
         progressPanel.revalidate();
         progressPanel.repaint();

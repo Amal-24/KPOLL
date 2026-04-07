@@ -81,7 +81,9 @@ public class VoterQueueViewScreen extends JPanel {
 
     private void fetchQueueData() {
         try (Connection conn = DatabaseHelper.getConnection()) {
-            String query = "SELECT q.*, b.booth_name FROM QueueStatus q JOIN Booths b ON q.booth_id = b.booth_id WHERE q.booth_id = ?";
+            String query = "SELECT b.booth_name, COALESCE(q.current_queue_length, 0) as current_queue_length, " +
+                          "COALESCE(q.avg_wait_time_mins, 0) as avg_wait_time_mins " +
+                          "FROM Booths b LEFT JOIN QueueStatus q ON b.booth_id = q.booth_id WHERE b.booth_id = ?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setInt(1, boothId);
             ResultSet rs = pstmt.executeQuery();
@@ -103,7 +105,7 @@ public class VoterQueueViewScreen extends JPanel {
                     suggestionLabel.setForeground(new Color(239, 68, 68));
                 }
             } else {
-                suggestionLabel.setText("No real-time data available for this booth.");
+                suggestionLabel.setText("Booth not found.");
                 suggestionLabel.setForeground(Color.GRAY);
             }
         } catch (Exception e) {

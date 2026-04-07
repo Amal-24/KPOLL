@@ -85,10 +85,7 @@ public class ResultDetailsScreen extends JPanel {
         }
 
         if (!dataFound) {
-            // Mock data
-            tableModel.addRow(new Object[]{"Candidate A (Mock)", "Party LDF", "45,200", "48.5%"});
-            tableModel.addRow(new Object[]{"Candidate B (Mock)", "Party UDF", "41,800", "44.8%"});
-            tableModel.addRow(new Object[]{"Candidate C (Mock)", "Party NDA", "6,150", "6.7%"});
+            tableModel.addRow(new Object[]{"No Data", "-", "0", "0%"});
         }
     }
 }

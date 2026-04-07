@@ -135,7 +135,10 @@ public class QueueStatusDashboard extends JPanel {
         graphPanel.removeAll();
         boolean dataFound = false;
         try (Connection conn = DatabaseHelper.getConnection()) {
-            String query = "SELECT q.*, b.booth_name FROM QueueStatus q JOIN Booths b ON q.booth_id = b.booth_id";
+            String query = "SELECT b.booth_id, b.booth_name, COALESCE(q.current_queue_length, 0) as current_queue_length, " +
+                          "COALESCE(q.avg_wait_time_mins, 0) as avg_wait_time_mins, " +
+                          "COALESCE(q.active_stations, 1) as active_stations " +
+                          "FROM Booths b LEFT JOIN QueueStatus q ON b.booth_id = q.booth_id";
             PreparedStatement pstmt = conn.prepareStatement(query);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -156,20 +159,15 @@ public class QueueStatusDashboard extends JPanel {
         }
 
         if (!dataFound) {
-            // Mock data for fallback
-            addMockQueueRow(101, "Booth A - Central School", 15, 10, 2, "NORMAL");
-            addMockQueueRow(102, "Booth B - High School", 45, 35, 1, "HEAVY");
-            addMockQueueRow(103, "Booth C - Community Center", 25, 20, 2, "MODERATE");
+            // No data available - show empty state
+            tableModel.addRow(new Object[]{"No Data", "No booths configured", 0, 0, 0, "N/A"});
         }
 
         graphPanel.revalidate();
         graphPanel.repaint();
     }
 
-    private void addMockQueueRow(int id, String name, int qLen, int wait, int stations, String status) {
-        tableModel.addRow(new Object[]{id, name, qLen, wait, stations, status});
-        addGraphicalBar(name, qLen, status);
-    }
+
 
     private void addGraphicalBar(String boothName, int qLen, String status) {
         JPanel barRow = new JPanel(new BorderLayout(10, 0));

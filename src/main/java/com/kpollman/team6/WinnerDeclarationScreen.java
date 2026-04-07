@@ -148,9 +148,7 @@ public class WinnerDeclarationScreen extends JPanel {
         }
 
         if (!dataFound) {
-            // Mock data
-            tableModel.addRow(new Object[]{1, "Trivandrum (Mock)", "Candidate X", "45,000", "PENDING"});
-            tableModel.addRow(new Object[]{2, "Kochi (Mock)", "Candidate Z", "62,100", "DECLARED"});
+            tableModel.addRow(new Object[]{0, "No constituency data", "-", "0", "PENDING"});
         }
     }
 }

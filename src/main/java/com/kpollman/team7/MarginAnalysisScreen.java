@@ -110,11 +110,7 @@ public class MarginAnalysisScreen extends JPanel {
         }
 
         if (!dataFound) {
-            // Mock data if no results in DB or connection fails
-            tableModel.addRow(new Object[]{"Under 1,000 (Mock)", 5, "10.00%"});
-            tableModel.addRow(new Object[]{"1,000 - 5,000 (Mock)", 15, "30.00%"});
-            tableModel.addRow(new Object[]{"5,000 - 10,000 (Mock)", 20, "40.00%"});
-            tableModel.addRow(new Object[]{"Over 10,000 (Mock)", 10, "20.00%"});
+            tableModel.addRow(new Object[]{"No Data", 0, "0%"});
         }
     }
 }

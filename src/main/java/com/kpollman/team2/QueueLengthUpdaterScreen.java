@@ -82,7 +82,9 @@ public class QueueLengthUpdaterScreen extends JPanel {
 
     private void fetchCurrentData() {
         try (Connection conn = DatabaseHelper.getConnection()) {
-            String query = "SELECT current_queue_length, active_stations FROM QueueStatus WHERE booth_id = ?";
+            String query = "SELECT COALESCE(q.current_queue_length, 0) as current_queue_length, " +
+                          "COALESCE(q.active_stations, 1) as active_stations " +
+                          "FROM Booths b LEFT JOIN QueueStatus q ON b.booth_id = q.booth_id WHERE b.booth_id = ?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setInt(1, boothId);
             ResultSet rs = pstmt.executeQuery();
@@ -115,17 +117,24 @@ public class QueueLengthUpdaterScreen extends JPanel {
             int waitTime = algorithm.calculateWaitTime(queueLength, activeStations);
 
             try (Connection conn = DatabaseHelper.getConnection()) {
-                String updateQuery = "UPDATE QueueStatus SET current_queue_length = ?, avg_wait_time_mins = ?, active_stations = ?, last_updated = CURRENT_TIMESTAMP WHERE booth_id = ?";
+                String updateQuery = "INSERT INTO QueueStatus (booth_id, current_queue_length, avg_wait_time_mins, active_stations, last_updated) " +
+                                   "VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP) " +
+                                   "ON DUPLICATE KEY UPDATE current_queue_length = VALUES(current_queue_length), " +
+                                   "avg_wait_time_mins = VALUES(avg_wait_time_mins), " +
+                                   "active_stations = VALUES(active_stations), " +
+                                   "last_updated = CURRENT_TIMESTAMP";
                 PreparedStatement pstmt = conn.prepareStatement(updateQuery);
-                pstmt.setInt(1, queueLength);
-                pstmt.setInt(2, waitTime);
-                pstmt.setInt(3, activeStations);
-                pstmt.setInt(4, boothId);
+                pstmt.setInt(1, boothId);
+                pstmt.setInt(2, queueLength);
+                pstmt.setInt(3, waitTime);
+                pstmt.setInt(4, activeStations);
                 
                 int rows = pstmt.executeUpdate();
                 if (rows > 0) {
                     JOptionPane.showMessageDialog(this, "Queue status updated successfully!\nEstimated wait: " + waitTime + " mins");
                     MainDashboard.showView(new QueueStatusDashboard());
+                } else {
+                    JOptionPane.showMessageDialog(this, "No changes were made to the database.", "Warning", JOptionPane.WARNING_MESSAGE);
                 }
             }
         } catch (NumberFormatException ex) {

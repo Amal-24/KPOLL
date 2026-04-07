@@ -100,13 +100,12 @@ public class GenderAnalyticsScreen extends JPanel {
         }
 
         if (!dataFound) {
-            // Mock data for preview
-            maleLabel.setText("Male Turnout (Mock): 450,000");
-            maleBar.setValue(48);
-            femaleLabel.setText("Female Turnout (Mock): 480,000");
-            femaleBar.setValue(51);
-            thirdGenderLabel.setText("Third Gender Turnout (Mock): 10,000");
-            thirdGenderBar.setValue(1);
+            maleLabel.setText("Male Turnout: 0");
+            maleBar.setValue(0);
+            femaleLabel.setText("Female Turnout: 0");
+            femaleBar.setValue(0);
+            thirdGenderLabel.setText("Third Gender Turnout: 0");
+            thirdGenderBar.setValue(0);
         }
     }
 }

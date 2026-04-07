@@ -131,10 +131,7 @@ public class TurnoutDashboard extends JPanel {
         }
 
         if (!dataFound) {
-            // Demo data for preview/fallback
-            tableModel.addRow(new Object[]{1, "Thiruvananthapuram", 45000, 48000, 200, 93200, "62.13%"});
-            tableModel.addRow(new Object[]{2, "Ernakulam", 52000, 51000, 150, 103150, "68.77%"});
-            tableModel.addRow(new Object[]{3, "Kozhikode", 38000, 40000, 100, 78100, "59.20%"});
+            tableModel.addRow(new Object[]{0, "No data available", 0, 0, 0, 0, "0%"});
         }
     }
 }

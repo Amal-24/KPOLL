@@ -134,10 +134,7 @@ public class LiveResultsDashboard extends JPanel {
         }
 
         if (!dataFound) {
-            // Mock data for UI demonstration
-            tableModel.addRow(new Object[]{"Trivandrum", "Candidate X", "Party A", "45,000", "5,000", "LEADING (CLOSE FIGHT)"});
-            tableModel.addRow(new Object[]{"Kochi", "Candidate Y", "Party B", "62,000", "12,000", "WINNER (SAFE LEAD)"});
-            tableModel.addRow(new Object[]{"Kozhikode", "Candidate Z", "Party C", "38,500", "2,100", "LEADING (COMFORTABLE)"});
+            tableModel.addRow(new Object[]{"No Results", "-", "-", "0", "0", "NO DATA"});
         }
     }
 }

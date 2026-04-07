@@ -99,10 +99,7 @@ public class CountingCenterDashboard extends JPanel {
         }
 
         if (!dataFound) {
-            // Mock data for preview
-            tableModel.addRow(new Object[]{1, "Trivandrum Central", "Main Hall A", 14, "20"});
-            tableModel.addRow(new Object[]{2, "Kochi Collectorate", "Conference Room 1", 10, "15"});
-            tableModel.addRow(new Object[]{3, "Kozhikode Town Hall", "Ground Floor", 12, "18"});
+            tableModel.addRow(new Object[]{0, "No counting centers configured", "-", 0, "0"});
         }
     }
 }
