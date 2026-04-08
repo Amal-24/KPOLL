@@ -52,9 +52,13 @@ public class CountingProgressTrackerScreen extends JPanel {
         boolean dataFound = false;
         try (Connection conn = DatabaseHelper.getConnection()) {
             String query = "SELECT c.constituency_name, " +
-                           "(SELECT COUNT(DISTINCT round_number) FROM RoundResults WHERE constituency_id = c.constituency_id) as rounds_completed, " +
-                           "20 as total_rounds " + // Assuming 20 rounds per constituency
-                           "FROM Constituencies c";
+                           "COUNT(DISTINCT rr.round_no) as rounds_completed, " +
+                           "GREATEST(20, COALESCE((SELECT MAX(round_no) FROM RoundResults), 0)) as total_rounds " +
+                           "FROM Constituencies c " +
+                           "LEFT JOIN CountingTables ct ON c.constituency_id = ct.constituency_id " +
+                           "LEFT JOIN RoundResults rr ON rr.table_id = ct.table_id " +
+                           "GROUP BY c.constituency_id, c.constituency_name " +
+                           "ORDER BY c.constituency_id";
             PreparedStatement pstmt = conn.prepareStatement(query);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -69,7 +73,10 @@ public class CountingProgressTrackerScreen extends JPanel {
         }
 
         if (!dataFound) {
-            // No counting progress data available
+            JLabel empty = new JLabel("No counting progress data available.");
+            empty.setFont(ModernUI.MAIN_FONT);
+            empty.setForeground(ModernUI.TEXT_COLOR_DARK);
+            progressPanel.add(empty);
         }
         progressPanel.revalidate();
         progressPanel.repaint();
