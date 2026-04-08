@@ -37,10 +37,17 @@ public class MarginAnalysisScreen extends JPanel {
 
         // Content
         String[] columns = {"Margin Range", "Count of Constituencies", "Percentage (%)"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         marginTable = new JTable(tableModel);
         marginTable.setFont(ModernUI.MAIN_FONT);
         marginTable.setRowHeight(40);
+        marginTable.setSelectionBackground(new Color(0, 120, 215));
+        marginTable.setSelectionForeground(Color.WHITE);
         
         JScrollPane scrollPane = new JScrollPane(marginTable);
         scrollPane.setBorder(BorderFactory.createLineBorder(ModernUI.BORDER_COLOR, 1));

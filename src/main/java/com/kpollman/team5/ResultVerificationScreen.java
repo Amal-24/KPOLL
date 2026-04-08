@@ -37,7 +37,12 @@ public class ResultVerificationScreen extends JPanel {
 
         // Table
         String[] columns = {"Constituency", "Round", "Candidate", "Votes", "Verification Status"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         resultsTable = new JTable(tableModel);
         resultsTable.setFont(ModernUI.MAIN_FONT);
         resultsTable.setRowHeight(40);

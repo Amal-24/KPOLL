@@ -41,7 +41,12 @@ public class QueueStatusDashboard extends JPanel {
 
         // Table
         String[] columns = {"Booth ID", "Booth Name", "Queue Length", "Avg Wait (min)", "Stations", "Status"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         queueTable = new JTable(tableModel);
         queueTable.setFont(ModernUI.MAIN_FONT);
         queueTable.setRowHeight(40);

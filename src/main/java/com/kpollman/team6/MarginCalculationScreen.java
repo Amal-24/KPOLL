@@ -35,13 +35,19 @@ public class MarginCalculationScreen extends JPanel {
 
         // Table
         String[] columns = {"ID", "Constituency Name", "Winner", "Runner-up", "Margin", "Vote Share %"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         marginTable = new JTable(tableModel);
         marginTable.setFont(ModernUI.MAIN_FONT);
         marginTable.setRowHeight(40);
         marginTable.setShowVerticalLines(false);
         marginTable.setGridColor(ModernUI.BORDER_COLOR);
-        marginTable.setSelectionBackground(new Color(241, 245, 249));
+        marginTable.setSelectionBackground(new Color(0, 120, 215));
+        marginTable.setSelectionForeground(Color.WHITE);
         
         JTableHeader header = marginTable.getTableHeader();
         header.setFont(new Font("Segoe UI", Font.BOLD, 14));

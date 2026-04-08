@@ -37,7 +37,12 @@ public class CountingCenterDashboard extends JPanel {
 
         // Table
         String[] columns = {"ID", "Center Name", "Location", "Tables Count", "Total Rounds"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         centersTable = new JTable(tableModel);
         centersTable.setFont(ModernUI.MAIN_FONT);
         centersTable.setRowHeight(40);

@@ -39,10 +39,17 @@ public class ResultDetailsScreen extends JPanel {
 
         // Table
         String[] columns = {"Candidate Name", "Party", "Votes Counted", "Percentage (%)"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         detailsTable = new JTable(tableModel);
         detailsTable.setFont(ModernUI.MAIN_FONT);
         detailsTable.setRowHeight(40);
+        detailsTable.setSelectionBackground(new Color(0, 120, 215));
+        detailsTable.setSelectionForeground(Color.WHITE);
         
         JScrollPane scrollPane = new JScrollPane(detailsTable);
         scrollPane.setBorder(BorderFactory.createLineBorder(ModernUI.BORDER_COLOR));

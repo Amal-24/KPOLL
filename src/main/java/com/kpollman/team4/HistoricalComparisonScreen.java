@@ -39,10 +39,17 @@ public class HistoricalComparisonScreen extends JPanel {
 
         // Content
         String[] columns = {"Constituency", "2026 (Current) %", "2021 (Prev) %", "2016 (Old) %", "Growth %"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         comparisonTable = new JTable(tableModel);
         comparisonTable.setFont(ModernUI.MAIN_FONT);
         comparisonTable.setRowHeight(40);
+        comparisonTable.setSelectionBackground(new Color(0, 120, 215));
+        comparisonTable.setSelectionForeground(Color.WHITE);
         
         JScrollPane scrollPane = new JScrollPane(comparisonTable);
         scrollPane.setBorder(BorderFactory.createLineBorder(ModernUI.BORDER_COLOR));

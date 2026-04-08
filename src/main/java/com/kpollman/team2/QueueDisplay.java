@@ -32,6 +32,7 @@ class TableQueueDisplay implements QueueDisplay {
         }
 
         JTable table = new JTable(data, columns);
+        table.setDefaultEditor(Object.class, null);
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         table.setRowHeight(30);
         table.setShowVerticalLines(false);

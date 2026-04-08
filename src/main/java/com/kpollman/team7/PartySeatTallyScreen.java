@@ -42,12 +42,19 @@ public class PartySeatTallyScreen extends JPanel {
 
         // Table
         String[] columns = {"Party Name", "Won", "Leading", "Total"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         tallyTable = new JTable(tableModel);
         tallyTable.setFont(ModernUI.MAIN_FONT);
         tallyTable.setRowHeight(40);
         tallyTable.setShowVerticalLines(false);
         tallyTable.setGridColor(ModernUI.BORDER_COLOR);
+        tallyTable.setSelectionBackground(new Color(0, 120, 215));
+        tallyTable.setSelectionForeground(Color.WHITE);
         
         JScrollPane scrollPane = new JScrollPane(tallyTable);
         scrollPane.setBorder(BorderFactory.createLineBorder(ModernUI.BORDER_COLOR, 1));

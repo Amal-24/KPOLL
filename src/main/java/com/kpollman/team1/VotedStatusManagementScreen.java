@@ -37,7 +37,12 @@ public class VotedStatusManagementScreen extends JPanel {
 
         // Table
         String[] columns = {"EPIC No", "Name", "Serial No", "Status"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         votedTable = new JTable(tableModel);
         votedTable.setFont(ModernUI.MAIN_FONT);
         votedTable.setRowHeight(40);

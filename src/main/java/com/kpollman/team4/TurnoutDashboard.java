@@ -37,13 +37,19 @@ public class TurnoutDashboard extends JPanel {
 
         // Table
         String[] columns = {"ID", "Constituency Name", "Male", "Female", "TG", "Total", "Turnout %"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         turnoutTable = new JTable(tableModel);
         turnoutTable.setFont(ModernUI.MAIN_FONT);
         turnoutTable.setRowHeight(40);
         turnoutTable.setShowVerticalLines(false);
         turnoutTable.setGridColor(ModernUI.BORDER_COLOR);
-        turnoutTable.setSelectionBackground(new Color(241, 245, 249));
+        turnoutTable.setSelectionBackground(new Color(0, 120, 215));
+        turnoutTable.setSelectionForeground(Color.WHITE);
         
         JTableHeader header = turnoutTable.getTableHeader();
         header.setFont(new Font("Segoe UI", Font.BOLD, 14));

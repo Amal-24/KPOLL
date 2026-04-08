@@ -35,13 +35,19 @@ public class WinnerDeclarationScreen extends JPanel {
 
         // Table
         String[] columns = {"ID", "Constituency", "Leading Candidate", "Total Votes", "Status"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         winnerTable = new JTable(tableModel);
         winnerTable.setFont(ModernUI.MAIN_FONT);
         winnerTable.setRowHeight(40);
         winnerTable.setShowVerticalLines(false);
         winnerTable.setGridColor(ModernUI.BORDER_COLOR);
-        winnerTable.setSelectionBackground(new Color(241, 245, 249));
+        winnerTable.setSelectionBackground(new Color(0, 120, 215));
+        winnerTable.setSelectionForeground(Color.WHITE);
         
         JTableHeader header = winnerTable.getTableHeader();
         header.setFont(new Font("Segoe UI", Font.BOLD, 14));

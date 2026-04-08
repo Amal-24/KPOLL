@@ -35,13 +35,19 @@ public class ResultAggregationScreen extends JPanel {
 
         // Table
         String[] columns = {"ID", "Candidate Name", "Constituency", "Aggregated Votes"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         aggregationTable = new JTable(tableModel);
         aggregationTable.setFont(ModernUI.MAIN_FONT);
         aggregationTable.setRowHeight(40);
         aggregationTable.setShowVerticalLines(false);
         aggregationTable.setGridColor(ModernUI.BORDER_COLOR);
-        aggregationTable.setSelectionBackground(new Color(241, 245, 249));
+        aggregationTable.setSelectionBackground(new Color(0, 120, 215));
+        aggregationTable.setSelectionForeground(Color.WHITE);
         
         JTableHeader header = aggregationTable.getTableHeader();
         header.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -112,10 +118,10 @@ public class ResultAggregationScreen extends JPanel {
         try (Connection conn = DatabaseHelper.getConnection()) {
             // Aggregation logic: Consolidate round-wise results into FinalResults table
             String query = "INSERT INTO FinalResults (candidate_id, constituency_id, total_votes, is_winner) " +
-                           "SELECT rr.candidate_id, rr.constituency_id, SUM(rr.votes_counted), FALSE " +
+                           "SELECT rr.candidate_id, rr.result_id, SUM(rr.votes_counted), FALSE " +
                            "FROM RoundResults rr " +
                            "WHERE rr.is_verified = TRUE " +
-                           "GROUP BY rr.candidate_id, rr.constituency_id " +
+                           "GROUP BY rr.candidate_id, rr.result_id " +
                            "ON DUPLICATE KEY UPDATE total_votes = VALUES(total_votes)";
             PreparedStatement pstmt = conn.prepareStatement(query);
             int rows = pstmt.executeUpdate();

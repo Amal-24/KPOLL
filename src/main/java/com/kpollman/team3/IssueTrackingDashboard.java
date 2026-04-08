@@ -42,7 +42,12 @@ public class IssueTrackingDashboard extends JPanel {
 
         // Table
         String[] columns = {"Issue ID", "Category", "Booth ID", "Urgency", "Status", "Reported At"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         issueTable = new JTable(tableModel);
 
         issueTable.setFont(ModernUI.MAIN_FONT);

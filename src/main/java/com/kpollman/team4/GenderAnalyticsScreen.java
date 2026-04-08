@@ -3,68 +3,77 @@ package com.kpollman.team4;
 import com.kpollman.db.DatabaseHelper;
 import com.kpollman.ui.MainDashboard;
 import com.kpollman.ui.ModernUI;
+
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 public class GenderAnalyticsScreen extends JPanel {
-    private JProgressBar maleBar, femaleBar, thirdGenderBar;
-    private JLabel maleLabel, femaleLabel, thirdGenderLabel;
+    private final DefaultTableModel tableModel;
+    private final JTable genderTable;
 
     public GenderAnalyticsScreen() {
         setLayout(new BorderLayout());
         setBackground(ModernUI.BACKGROUND_COLOR);
         setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
 
-        // Header
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setOpaque(false);
-        JLabel titleLabel = new JLabel("Gender-wise Voter Turnout");
+
+        JLabel titleLabel = new JLabel("Constituency-wise Gender Analysis");
         titleLabel.setFont(ModernUI.TITLE_FONT);
         titleLabel.setForeground(ModernUI.TEXT_COLOR_DARK);
         headerPanel.add(titleLabel, BorderLayout.WEST);
-        
+
         ModernUI.ModernButton backBtn = new ModernUI.ModernButton("Back to Dashboard");
         backBtn.addActionListener(e -> MainDashboard.showView(new TurnoutDashboard()));
         headerPanel.add(backBtn, BorderLayout.EAST);
         add(headerPanel, BorderLayout.NORTH);
 
-        // Content
-        ModernUI.RoundedPanel card = new ModernUI.RoundedPanel(20, ModernUI.CARD_BACKGROUND);
-        card.setLayout(new GridLayout(6, 1, 10, 10));
-        card.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        String[] columns = {
+            "ID", "Constituency", "Male", "Female", "Third Gender",
+            "Total Turnout", "Male %", "Female %", "Third %"
+        };
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
 
-        maleLabel = new JLabel("Male Turnout: 0");
-        maleLabel.setFont(ModernUI.MAIN_FONT);
-        maleBar = new JProgressBar(0, 100);
-        maleBar.setStringPainted(true);
-        maleBar.setForeground(new Color(59, 130, 246)); // Blue 500
+        genderTable = new JTable(tableModel);
+        genderTable.setFont(ModernUI.MAIN_FONT);
+        genderTable.setRowHeight(40);
+        genderTable.setShowVerticalLines(false);
+        genderTable.setGridColor(ModernUI.BORDER_COLOR);
+        genderTable.setSelectionBackground(new Color(0, 120, 215));
+        genderTable.setSelectionForeground(Color.WHITE);
 
-        femaleLabel = new JLabel("Female Turnout: 0");
-        femaleLabel.setFont(ModernUI.MAIN_FONT);
-        femaleBar = new JProgressBar(0, 100);
-        femaleBar.setStringPainted(true);
-        femaleBar.setForeground(new Color(236, 72, 153)); // Pink 500
+        JTableHeader header = genderTable.getTableHeader();
+        header.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        header.setBackground(Color.WHITE);
+        header.setForeground(ModernUI.ACCENT_COLOR);
+        header.setPreferredSize(new Dimension(100, 40));
 
-        thirdGenderLabel = new JLabel("Third Gender Turnout: 0");
-        thirdGenderLabel.setFont(ModernUI.MAIN_FONT);
-        thirdGenderBar = new JProgressBar(0, 100);
-        thirdGenderBar.setStringPainted(true);
-        thirdGenderBar.setForeground(new Color(249, 115, 22)); // Orange 500
+        JScrollPane scrollPane = new JScrollPane(genderTable);
+        scrollPane.setBorder(BorderFactory.createLineBorder(ModernUI.BORDER_COLOR, 1));
+        scrollPane.getViewport().setBackground(Color.WHITE);
 
-        card.add(maleLabel); card.add(maleBar);
-        card.add(femaleLabel); card.add(femaleBar);
-        card.add(thirdGenderLabel); card.add(thirdGenderBar);
+        JPanel tableContainer = new JPanel(new BorderLayout());
+        tableContainer.setOpaque(false);
+        tableContainer.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+        tableContainer.add(scrollPane, BorderLayout.CENTER);
+        add(tableContainer, BorderLayout.CENTER);
 
-        add(card, BorderLayout.CENTER);
-
-        ModernUI.ModernButton refreshBtn = new ModernUI.ModernButton("Refresh Analytics");
-        refreshBtn.addActionListener(e -> fetchGenderStats());
-        
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.CENTER));
         footer.setOpaque(false);
+
+        ModernUI.ModernButton refreshBtn = new ModernUI.ModernButton("Refresh Analysis");
+        refreshBtn.addActionListener(e -> fetchGenderStats());
         footer.add(refreshBtn);
         add(footer, BorderLayout.SOUTH);
 
@@ -72,40 +81,54 @@ public class GenderAnalyticsScreen extends JPanel {
     }
 
     private void fetchGenderStats() {
+        tableModel.setRowCount(0);
         boolean dataFound = false;
+
         try (Connection conn = DatabaseHelper.getConnection()) {
-            String query = "SELECT SUM(male_votes) as male, SUM(female_votes) as female, SUM(third_gender_votes) as third FROM HourlyTurnout";
+            String query = "SELECT c.constituency_id, c.constituency_name, " +
+                           "COALESCE(SUM(ht.male_votes), 0) as male, " +
+                           "COALESCE(SUM(ht.female_votes), 0) as female, " +
+                           "COALESCE(SUM(ht.third_gender_votes), 0) as third " +
+                           "FROM Constituencies c " +
+                           "LEFT JOIN Booths b ON c.constituency_id = b.constituency_id " +
+                           "LEFT JOIN HourlyTurnout ht ON b.booth_id = ht.booth_id " +
+                           "GROUP BY c.constituency_id, c.constituency_name " +
+                           "ORDER BY c.constituency_id";
             PreparedStatement pstmt = conn.prepareStatement(query);
             ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
+
+            while (rs.next()) {
                 int male = rs.getInt("male");
                 int female = rs.getInt("female");
                 int third = rs.getInt("third");
                 int total = male + female + third;
 
-                if (total > 0) {
-                    maleLabel.setText("Male Turnout: " + String.format("%,d", male));
-                    maleBar.setValue((male * 100) / total);
-
-                    femaleLabel.setText("Female Turnout: " + String.format("%,d", female));
-                    femaleBar.setValue((female * 100) / total);
-
-                    thirdGenderLabel.setText("Third Gender Turnout: " + String.format("%,d", third));
-                    thirdGenderBar.setValue((third * 100) / total);
-                    dataFound = true;
-                }
+                tableModel.addRow(new Object[] {
+                    rs.getInt("constituency_id"),
+                    rs.getString("constituency_name"),
+                    String.format("%,d", male),
+                    String.format("%,d", female),
+                    String.format("%,d", third),
+                    String.format("%,d", total),
+                    formatPercentage(male, total),
+                    formatPercentage(female, total),
+                    formatPercentage(third, total)
+                });
+                dataFound = true;
             }
         } catch (Exception e) {
             System.err.println("Gender stats fetch error: " + e.getMessage());
         }
 
         if (!dataFound) {
-            maleLabel.setText("Male Turnout: 0");
-            maleBar.setValue(0);
-            femaleLabel.setText("Female Turnout: 0");
-            femaleBar.setValue(0);
-            thirdGenderLabel.setText("Third Gender Turnout: 0");
-            thirdGenderBar.setValue(0);
+            tableModel.addRow(new Object[] {0, "No data available", "0", "0", "0", "0", "0.00%", "0.00%", "0.00%"});
         }
+    }
+
+    private String formatPercentage(int value, int total) {
+        if (total <= 0) {
+            return "0.00%";
+        }
+        return String.format("%.2f%%", (value * 100.0) / total);
     }
 }

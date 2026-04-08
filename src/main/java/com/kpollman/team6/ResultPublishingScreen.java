@@ -35,12 +35,19 @@ public class ResultPublishingScreen extends JPanel {
 
         // Table
         String[] columns = {"Constituency", "Winner", "Party", "Votes", "Status"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         publishTable = new JTable(tableModel);
         publishTable.setFont(ModernUI.MAIN_FONT);
         publishTable.setRowHeight(40);
         publishTable.setShowVerticalLines(false);
         publishTable.setGridColor(ModernUI.BORDER_COLOR);
+        publishTable.setSelectionBackground(new Color(0, 120, 215));
+        publishTable.setSelectionForeground(Color.WHITE);
         
         JTableHeader header = publishTable.getTableHeader();
         header.setFont(new Font("Segoe UI", Font.BOLD, 14));

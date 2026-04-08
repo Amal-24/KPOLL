@@ -35,13 +35,19 @@ public class LiveResultsDashboard extends JPanel {
 
         // Table
         String[] columns = {"Constituency", "Leading Candidate", "Party", "Votes", "Margin", "Status"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         trendsTable = new JTable(tableModel);
         trendsTable.setFont(ModernUI.MAIN_FONT);
         trendsTable.setRowHeight(40);
         trendsTable.setShowVerticalLines(false);
         trendsTable.setGridColor(ModernUI.BORDER_COLOR);
-        trendsTable.setSelectionBackground(new Color(241, 245, 249));
+        trendsTable.setSelectionBackground(new Color(0, 120, 215));
+        trendsTable.setSelectionForeground(Color.WHITE);
         
         JTableHeader header = trendsTable.getTableHeader();
         header.setFont(new Font("Segoe UI", Font.BOLD, 14));

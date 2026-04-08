@@ -35,12 +35,19 @@ public class ResultCertificationScreen extends JPanel {
 
         // Table
         String[] columns = {"ID", "Name", "Constituency", "Total Votes", "Status"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         certificationTable = new JTable(tableModel);
         certificationTable.setFont(ModernUI.MAIN_FONT);
         certificationTable.setRowHeight(40);
         certificationTable.setShowVerticalLines(false);
         certificationTable.setGridColor(ModernUI.BORDER_COLOR);
+        certificationTable.setSelectionBackground(new Color(0, 120, 215));
+        certificationTable.setSelectionForeground(Color.WHITE);
         
         JTableHeader header = certificationTable.getTableHeader();
         header.setFont(new Font("Segoe UI", Font.BOLD, 14));

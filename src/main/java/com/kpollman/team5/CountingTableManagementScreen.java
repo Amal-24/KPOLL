@@ -37,7 +37,12 @@ public class CountingTableManagementScreen extends JPanel {
 
         // Table
         String[] columns = {"Table ID", "Center", "Table Number", "Supervisor", "Status"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         tablesTable = new JTable(tableModel);
         tablesTable.setFont(ModernUI.MAIN_FONT);
         tablesTable.setRowHeight(40);

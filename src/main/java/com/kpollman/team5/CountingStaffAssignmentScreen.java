@@ -33,7 +33,12 @@ public class CountingStaffAssignmentScreen extends JPanel {
 
         // Content
         String[] columns = {"Staff Name", "Role", "Assigned Table", "Assigned Center", "Status"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         staffTable = new JTable(tableModel);
         staffTable.setFont(ModernUI.MAIN_FONT);
         staffTable.setRowHeight(40);
