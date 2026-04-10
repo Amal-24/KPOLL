@@ -119,6 +119,7 @@ CREATE TABLE IF NOT EXISTS FinalResults (
     vote_share_percentage DECIMAL(5,2) DEFAULT 0.00,
     is_winner BOOLEAN DEFAULT FALSE,
     certified_at TIMESTAMP NULL,
+    published_at TIMESTAMP NULL,
     FOREIGN KEY (candidate_id) REFERENCES Candidates(candidate_id),
     FOREIGN KEY (constituency_id) REFERENCES Constituencies(constituency_id)
 );
@@ -127,6 +128,12 @@ CREATE TABLE IF NOT EXISTS FinalResults (
 INSERT INTO Constituencies (constituency_name, total_voters) VALUES ('Thiruvananthapuram', 150000);
 INSERT INTO Booths (booth_name, constituency_id, booth_type) VALUES ('Booth 1 - Central School', 1, 'Urban');
 INSERT INTO Candidates (candidate_name, party_name, constituency_id) VALUES ('John Doe', 'Party A', 1), ('Jane Smith', 'Party B', 1);
+INSERT INTO CountingCenters (center_name, location) VALUES ('Thiruvananthapuram Counting Center', 'Thiruvananthapuram');
+INSERT INTO CountingTables (center_id, constituency_id, supervisor_name, assistant_name) VALUES (1, 1, 'Supervisor A', 'Assistant A');
+INSERT INTO RoundResults (round_no, table_id, candidate_id, votes_counted, is_verified) VALUES 
+(1, 1, 1, 15000, TRUE), (1, 1, 2, 12000, TRUE),
+(2, 1, 1, 18000, TRUE), (2, 1, 2, 15000, TRUE),
+(3, 1, 1, 12000, TRUE), (3, 1, 2, 18000, TRUE);
 INSERT INTO QueueStatus (booth_id, current_queue_length, avg_wait_time_mins, active_stations) VALUES (1, 0, 0, 1);
 
 
